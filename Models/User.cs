@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Learntendo_backend.Models
 {
+    [Table("User")]
     public class User
     {
         [Key]

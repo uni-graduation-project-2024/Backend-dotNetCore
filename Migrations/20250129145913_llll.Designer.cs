@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Learntendo_backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250128185919_third-migration")]
-    partial class thirdmigration
+    [Migration("20250129145913_llll")]
+    partial class llll
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
