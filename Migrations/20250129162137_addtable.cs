@@ -6,11 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Learntendo_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class initialmigration : Migration
+    public partial class addtable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Admin",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Admin", x => x.UserId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "User",
                 columns: table => new
@@ -19,7 +33,7 @@ namespace Learntendo_backend.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TotalQuestion = table.Column<int>(type: "int", nullable: false),
                     NumQuestionSolToday = table.Column<int>(type: "int", nullable: false),
@@ -42,7 +56,7 @@ namespace Learntendo_backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.UserId);
+                    table.PrimaryKey("PK_User", x => x.UserId);
                 });
 
             migrationBuilder.CreateTable(
@@ -58,11 +72,11 @@ namespace Learntendo_backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Subjects", x => x.SubjectId);
+                    table.PrimaryKey("PK_Subject", x => x.SubjectId);
                     table.ForeignKey(
-                        name: "FK_Subjects_Users_UserId",
+                        name: "FK_Subject_User_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "User",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -88,34 +102,34 @@ namespace Learntendo_backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Exams", x => x.ExamId);
+                    table.PrimaryKey("PK_Exam", x => x.ExamId);
                     table.ForeignKey(
-                        name: "FK_Exams_Subjects_SubjectId",
+                        name: "FK_Exam_Subject_SubjectId",
                         column: x => x.SubjectId,
-                        principalTable: "Subjects",
+                        principalTable: "Subject",
                         principalColumn: "SubjectId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Exams_Users_UserId",
+                        name: "FK_Exam_User_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "User",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Exams_SubjectId",
-                table: "Exams",
+                name: "IX_Exam_SubjectId",
+                table: "Exam",
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Exams_UserId",
-                table: "Exams",
+                name: "IX_Exam_UserId",
+                table: "Exam",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subjects_UserId",
-                table: "Subjects",
+                name: "IX_Subject_UserId",
+                table: "Subject",
                 column: "UserId");
         }
 
@@ -123,13 +137,16 @@ namespace Learntendo_backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Exams");
+                name: "Admin");
 
             migrationBuilder.DropTable(
-                name: "Subjects");
+                name: "Exam");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Subject");
+
+            migrationBuilder.DropTable(
+                name: "User");
         }
     }
 }
