@@ -74,5 +74,10 @@ namespace Learntendo_backend.Data
         {
             return await _db.User.AnyAsync(x => x.Email == email);
         }
+
+  
+       
+       
+
     }
 }

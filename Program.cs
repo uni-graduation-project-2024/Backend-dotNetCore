@@ -1,5 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Learntendo_backend.Data;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Learntendo_backend.configurations;
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
+using Microsoft.IdentityModel.Tokens; 
+using System.Text; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +17,23 @@ builder.Services.AddDbContext<DataContext>(options =>
 });
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) // Or "Bearer"
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])), // Get from JwtSettings
+            ValidateIssuer = true,  // If you have an issuer
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"], // From your config
+            ValidateAudience = true, // If you have an audience
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],// From your config
+            ValidateLifetime = true, // Optional, but good practice
+            ClockSkew = TimeSpan.Zero // Adjust if needed
+        };
+    });
 // Add services to the container.
 //builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
@@ -38,7 +62,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

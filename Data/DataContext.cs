@@ -17,6 +17,7 @@ namespace Learntendo_backend.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+           
             modelBuilder.Entity<Subject>()
                .HasOne(sc => sc.User)
                .WithMany(c => c.Subjects)
