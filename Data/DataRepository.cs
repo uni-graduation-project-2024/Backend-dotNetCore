@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Learntendo_backend.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -19,6 +20,20 @@ namespace Learntendo_backend.Data
         {
             return await table.ToListAsync();
         }
+        public async Task<List<Subject>> GetAllsubbyUserFun(int userId)
+        {
+            return await _db.Subject.Where(x=>x.UserId == userId).ToListAsync();
+        }
+        public async Task<Subject> GetSubbyUserFun(int id)
+        {
+            var result = await _db.Subject.FirstOrDefaultAsync(x => x.SubjectId == id );
+            if (result == null)
+            {
+                throw new KeyNotFoundException($" id {id} not found");
+            }
+            return result;
+        }
+
 
         public async Task<T> GetByIdFun(int id)
         {
