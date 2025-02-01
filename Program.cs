@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Learntendo_backend.configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.IdentityModel.Tokens; 
-using System.Text; 
+using System.Text;
 using Learntendo_backend.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
