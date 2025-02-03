@@ -12,13 +12,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Learntendo_backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-<<<<<<<< HEAD:Migrations/20250129162137_addtable.Designer.cs
+//<<<<<<<< HEAD:Migrations/20250129162137_addtable.Designer.cs
     [Migration("20250129162137_addtable")]
-    partial class addtable
-========
-    [Migration("20250129145913_llll")]
+   // partial class addtable
+//========
+   // [Migration("20250129145913_llll")]
     partial class llll
->>>>>>>> 4a92f936a1676dffa49d422b2d8801254d4f37e8:Migrations/20250129145913_llll.Designer.cs
+//>>>>>>>> 4a92f936a1676dffa49d422b2d8801254d4f37e8:Migrations/20250129145913_llll.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
