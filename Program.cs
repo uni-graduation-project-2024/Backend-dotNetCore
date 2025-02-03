@@ -10,6 +10,7 @@ using System.Text;
 using Serilog;
 using System.Security.Cryptography;
 using Learntendo_backend.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 
 var builder = WebApplication.CreateBuilder(args);

@@ -162,7 +162,7 @@ namespace Learntendo_backend.Controllers
         }
         // View all users - Only admins can access this
         [HttpGet("view-users")]
-        [Authorize(Roles = "Admin")]  // Ensure only admins can view users
+       // [Authorize(Roles = "Admin")]  // Ensure only admins can view users
         public async Task<IActionResult> ViewUsers()
         {
             var users = await _context.User.ToListAsync();
