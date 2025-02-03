@@ -12,10 +12,7 @@ namespace Learntendo_backend.Models
         [EmailAddress(ErrorMessage = "Please enter valid email")]
         public required string Email { get; set; }
 
-        //[Required(ErrorMessage = "Password is required")]
-        //public required string Password { get; set; }
-     
-
+       
         [Required]
         public byte[]? PasswordHash { get; set; }
         public byte[]? PasswordSalt { get; set; }

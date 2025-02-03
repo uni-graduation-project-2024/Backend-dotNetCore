@@ -5,12 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Learntendo_backend.Migrations
 {
-    /// <inheritdoc />
-<<<<<<<< HEAD:Migrations/20250129162137_addtable.cs
-    public partial class addtable : Migration
-========
+
+
     public partial class llll : Migration
->>>>>>>> 4a92f936a1676dffa49d422b2d8801254d4f37e8:Migrations/20250129145913_llll.cs
+
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
