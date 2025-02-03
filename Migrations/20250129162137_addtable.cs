@@ -6,8 +6,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Learntendo_backend.Migrations
 {
 
+   
 
-    public partial class llll : Migration
+    public partial class addtable : Migration
 
     {
         /// <inheritdoc />
