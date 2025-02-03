@@ -4,15 +4,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Learntendo_backend.configurations;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
+using Microsoft.IdentityModel.Tokens; 
 using System.Text;
-using Learntendo_backend.Models;
-using System.Security.Cryptography;
 using Serilog;
+using System.Security.Cryptography;
+using Learntendo_backend.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 // Add services to the container.
 builder.Services.AddDbContext<DataContext>(options =>
 {
@@ -28,6 +29,7 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
