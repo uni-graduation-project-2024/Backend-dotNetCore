@@ -16,10 +16,11 @@ namespace Learntendo_backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly DataContext _context;
-
+       
         public UserController(DataContext context)
         {
             _context = context;
+          
         }
 
         [HttpPost("change-password")]
@@ -64,5 +65,10 @@ namespace Learntendo_backend.Controllers
                 passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             }
         }
+
+
+       
     }
 }
+
+

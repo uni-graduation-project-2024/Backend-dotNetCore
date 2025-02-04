@@ -15,6 +15,8 @@ namespace Learntendo_backend.Data
 
         public DbSet<Admin> Admin { get; set; }
 
+       
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
            
@@ -35,6 +37,8 @@ namespace Learntendo_backend.Data
                .WithMany(c => c.Exams)
                .HasForeignKey(sc => sc.SubjectId)
                .OnDelete(DeleteBehavior.Restrict);
+
+         
         }
     }
 }

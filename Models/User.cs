@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+
 namespace Learntendo_backend.Models
 {
     [Table("User")]
@@ -52,6 +53,8 @@ namespace Learntendo_backend.Models
 
         public DateTime? DateCompleteMonthlyChallenge { get; set; }
 
+
+
         [Required]
         public DateTime JoinedDate { get; set; }
 
@@ -60,5 +63,12 @@ namespace Learntendo_backend.Models
         public ICollection<Subject> Subjects { get; set; } = new List<Subject>();
 
         public ICollection<Exam> Exams { get; set; } = new List<Exam>();
+
+        
+
+
+       
+
+      
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.NetworkInformation;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Learntendo_backend.Data;
@@ -6,21 +7,23 @@ using Learntendo_backend.Dtos;
 using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens; 
 using Microsoft.AspNetCore.Authorization;
-
 
 namespace Learntendo_backend.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly IAuthRepository _authRepository;
+       
 
         public AuthController(IAuthRepository authRepository)
         {
             _authRepository = authRepository;
+            
         }
 
         [HttpPost("login")]
@@ -66,6 +69,7 @@ namespace Learntendo_backend.Controllers
 
             return tokenHandler.WriteToken(token);
         }
+   
 
         [HttpPost("registeruser")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto RegisterDto)

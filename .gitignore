@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# config files that is device depended
+appsettings.json
+Migrations/
+
 # User-specific files
 *.rsuser
 *.suo

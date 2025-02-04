@@ -10,6 +10,19 @@ using System.Text;
 using Learntendo_backend.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllers();
+builder.Services.AddRazorPages();
+
+// إضافة خدمات CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+});
+
+
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 // Add services to the container.
 builder.Services.AddDbContext<DataContext>(options =>
@@ -29,13 +42,19 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
 builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
 
-
+var secretKey = builder.Configuration["JwtSettings:SecretKey"];
+if (string.IsNullOrWhiteSpace(secretKey))
+{
+    throw new InvalidOperationException("JWT Secret Key is missing or empty in configuration.");
+}
+var key = Encoding.UTF8.GetBytes(secretKey);
+////////////////////////////////////////////////////////
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-         var secretKey = builder.Configuration["JwtSettings:SecretKey"];
-       // var secretKey = _configuration["JwtSettings:SecretKey"];
+        var secretKey = builder.Configuration["JwtSettings:SecretKey"];
+        // var secretKey = _configuration["JwtSettings:SecretKey"];
         if (string.IsNullOrWhiteSpace(secretKey))
         {
             throw new InvalidOperationException("JWT Secret Key is missing or empty in configuration.");
@@ -56,6 +75,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             RoleClaimType = "role"
             //////
         };
+    
     });
 
 builder.Logging.AddConsole();
@@ -70,6 +90,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 builder.Services.AddCors(options =>
 {
@@ -90,9 +111,7 @@ using (var scope = app.Services.CreateScope())
 
 
 
-app.UseCors("AllowAll"); // Apply CORS policy
-
-// Configure the HTTP request pipeline.
+//Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -105,14 +124,21 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseWebSockets();
+app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseEndpoints(endpoints =>
+{    });
 
+
+app.MapControllers();
 app.Run();
 
 // دالة SeedAdmin لإضافة Admin تلقائيًا إذا لم يكن موجودًا
