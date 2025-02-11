@@ -4,7 +4,6 @@ using Learntendo_backend.Data;
 using Learntendo_backend.Dtos;
 using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
 using Learntendo_backend.Models;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Learntendo_backend.Controllers
