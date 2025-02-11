@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Azure;
 using Learntendo_backend.Data;
 using Learntendo_backend.Dtos;
 using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
 using Learntendo_backend.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Learntendo_backend.Controllers
@@ -87,16 +89,39 @@ namespace Learntendo_backend.Controllers
             await _userRepo.UpdateFun(user);
             return Ok("Exam Deleted Successfully");
         }
-        //[HttpPatch("{id}")]
-        //public async Task<IActionResult> MoveExamtoAnotherSubject(int id)
-        //{
-        //    var exam = await _ExamRepo.GetByIdFun(id);
-        //    if (exam == null)
-        //    {
-        //        return NotFound($"Exam with {id} not found");
-        //    }
-        //    await _ExamRepo.UpdateFun(Exam);
-        //    return Ok("Exam Updated Successfully");
-        //}
+
+        [HttpPatch("{id}/{subId}")]
+        public async Task<IActionResult> MoveExamToAnotherSub( int subId, [FromRoute] int id)
+        {     
+            var exam = await _examRepo.GetByIdFun(id);
+            if (exam == null)
+            {
+                return NotFound($"Exam with ID {id} not found.");
+            }         
+            var oldSubject = await _subjectRepo.GetByIdFun(exam.SubjectId);
+            if (oldSubject == null)
+            {
+                return NotFound($"Old Subject with ID {exam.SubjectId} not found.");
+            }
+            var newSubject = await _subjectRepo.GetByIdFun(subId);
+            if (newSubject == null)
+            {
+                return NotFound($"New Subject with ID {subId} not found.");
+            }      
+            oldSubject.NumExams -= 1;
+            oldSubject.TotalQuestions -= exam.NumQuestions;
+            if (oldSubject.NumExams < 0 || oldSubject.TotalQuestions < 0)
+            {
+                return BadRequest("The number of exams or number of TotalQuestions in the old subject cannot be negative.");
+            }
+            await _subjectRepo.UpdateFun(oldSubject);        
+            newSubject.NumExams += 1;
+            newSubject.TotalQuestions += exam.NumQuestions;
+            await _subjectRepo.UpdateFun(newSubject);
+            exam.SubjectId = subId;
+            await _examRepo.UpdateFun(exam);
+            return Ok("Exam moved successfully.");
+        }
+
     }
 }
