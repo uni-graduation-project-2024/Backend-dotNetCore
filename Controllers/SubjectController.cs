@@ -41,7 +41,7 @@ namespace Learntendo_backend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSubjectById(int id )
         {
-            var subject = await _subjectRepo.GetSubbyUserFun(id);
+            var subject = await _subjectRepo.GetByIdFun(id);
             if (subject == null)
             {
                 return NotFound($"subject with this id {id} not found");
