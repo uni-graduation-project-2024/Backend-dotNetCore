@@ -28,15 +28,7 @@ namespace Learntendo_backend.Data
         {
             return await _db.Exam.Where(x => x.SubjectId == subId).ToListAsync();
         }
-        public async Task<Subject> GetSubbyUserFun(int id)
-        {
-            var result = await _db.Subject.FirstOrDefaultAsync(x => x.SubjectId == id );
-            if (result == null)
-            {
-                throw new KeyNotFoundException($" id {id} not found");
-            }
-            return result;
-        }
+
 
 
         public async Task<T> GetByIdFun(int id)

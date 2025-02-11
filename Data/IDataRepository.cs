@@ -6,7 +6,6 @@ namespace Learntendo_backend.Data
         Task<IEnumerable<T>> GetAllFun();
         Task<List<Subject>> GetAllsubbyUserFun(int userId);
         Task<List<Exam>> GetAllExambysubFun(int subId);
-        Task<Subject> GetSubbyUserFun(int id);
         Task<T> GetByIdFun(int id);
         Task AddFun(T entity);
         Task UpdateFun(T entity);
