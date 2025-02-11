@@ -31,6 +31,7 @@
             public string CorrectAnswer { get; set; }
             public string UserAnswer { get; set; }
             public bool IsCorrect { get; set; }
+            public string Explain { get; set; }
         }
 
         public class TfQuestionDto
@@ -40,6 +41,7 @@
             public bool CorrectAnswer { get; set; }
             public bool UserAnswer { get; set; }
             public bool IsCorrect { get; set; }
+            public string Explain { get; set; }
         }
     }
 
