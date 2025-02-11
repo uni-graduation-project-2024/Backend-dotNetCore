@@ -37,7 +37,8 @@ namespace Learntendo_backend.Controllers
             if (examDto.QuestionType == "TF")
             {
                 exam.McqQuestionsData = null;
-            }            
+            }
+            exam.CreatedDate = DateTime.Now;    
             await _examRepo.AddFun(exam);
             var subject = await _subjectRepo.GetByIdFun(exam.SubjectId);
             subject.NumExams += 1;
@@ -127,6 +128,29 @@ namespace Learntendo_backend.Controllers
             await _examRepo.UpdateFun(exam);
             return Ok("Exam moved successfully.");
         }
+        //public async Task<bool> CheckAndUpdateDailyChallenge(int userId)
+        //{
+
+        //    var today = DateTime.UtcNow.Date;
+
+        //    bool hasCreatedExamToday = await _examRepo.AnyAsync(exam =>
+        //        exam.UserId == userId && exam.CreatedDate.Date == today);
+
+
+        //    return hasCreatedExamToday;
+        //}
+        //public async Task UpdateUserDailyChallenge(int userId)
+        //{
+        //    var user = await _userRepo.GetByIdFun(userId);
+        //    if (user == null)
+        //    {
+        //        throw new Exception("User not found.");
+        //    }
+
+        //    user.CompleteDailyChallenge = await CheckAndUpdateDailyChallenge(userId);
+        //    await _userRepo.UpdateFun(user);
+        //}
+
 
     }
 }
