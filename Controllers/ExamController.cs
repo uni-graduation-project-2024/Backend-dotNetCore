@@ -11,12 +11,14 @@ namespace Learntendo_backend.Controllers
     [ApiController]
     public class ExamController : Controller
     {
-        private readonly IDataRepository<Exam> _ExamRepo;
+        private readonly IDataRepository<Exam> _examRepo;
         private readonly IDataRepository<Subject> _subjectRepo;
+        private readonly IDataRepository<User> _userRepo;
         private readonly IMapper _map;
-        public ExamController(IDataRepository<Subject> subjectRepo, IDataRepository<Exam> examRepo, IMapper map)
+        public ExamController(IDataRepository<Subject> subjectRepo, IDataRepository<Exam> examRepo, IDataRepository<User> userRepo, IMapper map)
         {
-            _ExamRepo = examRepo;
+            _userRepo = userRepo;
+            _examRepo = examRepo;
             _subjectRepo = subjectRepo;
             _map = map;
         }
@@ -35,12 +37,14 @@ namespace Learntendo_backend.Controllers
             {
                 exam.McqQuestionsData = null;
             }            
-            await _ExamRepo.AddFun(exam);
+            await _examRepo.AddFun(exam);
             var subject = await _subjectRepo.GetByIdFun(exam.SubjectId);
-            subject.NumExams+=1;
+            subject.NumExams += 1;
             subject.TotalQuestions += exam.NumQuestions;
             await _subjectRepo.UpdateFun(subject);
-
+            var user = await _userRepo.GetByIdFun(exam.UserId);
+            user.TotalQuestion += exam.NumQuestions;
+            await _userRepo.UpdateFun(user);
 
             return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
             //return Ok("created Successfully");
@@ -48,7 +52,7 @@ namespace Learntendo_backend.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetExamById(int id)
         {
-            var exam = await _ExamRepo.GetByIdFun(id);
+            var exam = await _examRepo.GetByIdFun(id);
             if(exam == null)
             {
                 return NotFound($"Exam with {id} not found");
@@ -59,7 +63,7 @@ namespace Learntendo_backend.Controllers
         [HttpGet("all/{subId}")]
         public async Task<IActionResult> GetAllExamBySubId(int subId)
         {
-            var exams = await _ExamRepo.GetAllExambysubFun(subId);
+            var exams = await _examRepo.GetAllExambysubFun(subId);
   
             var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
             return Ok(examDto);
@@ -67,17 +71,20 @@ namespace Learntendo_backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExam(int id)
         {
-            var exam = await _ExamRepo.GetByIdFun(id);
+            var exam = await _examRepo.GetByIdFun(id);
             if(exam == null)
             {
                 return NotFound($"Exam with {id} not found");
             }
 
-            await _ExamRepo.DeleteFun(id);
+            await _examRepo.DeleteFun(id);
             var subject = await _subjectRepo.GetByIdFun(exam.SubjectId);
             subject.NumExams -= 1;
             subject.TotalQuestions -= exam.NumQuestions;
             await _subjectRepo.UpdateFun(subject);
+            var user = await _userRepo.GetByIdFun(exam.UserId);
+            user.TotalQuestion -= exam.NumQuestions;
+            await _userRepo.UpdateFun(user);
             return Ok("Exam Deleted Successfully");
         }
         //[HttpPatch("{id}")]
