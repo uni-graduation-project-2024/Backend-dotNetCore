@@ -49,10 +49,21 @@ namespace Learntendo_backend.Controllers
         [HttpGet("all/{subId}")]
         public async Task<IActionResult> GetAllExamBySubId(int subId)
         {
-            var exam = await _ExamRepo.GetAllExambysubFun(subId);
+            var exams = await _ExamRepo.GetAllExambysubFun(subId);
   
-            var examDto = _map.Map<IEnumerable<ExamDto>>(exam);
+            var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
             return Ok(examDto);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteExam(int id)
+        {
+            var exam = await _ExamRepo.GetByIdFun(id);
+            if(exam == null)
+            {
+                return NotFound($"Exam with {id} not found");
+            }
+            await _ExamRepo.DeleteFun(id);
+            return Ok("Deleted Successfully");
         }
     }
 }
