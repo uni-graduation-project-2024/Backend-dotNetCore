@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Learntendo_backend.Models
 {
@@ -7,15 +9,15 @@ namespace Learntendo_backend.Models
         [Key]
         public int ExamId { get; set; }
 
-        public string? QuestionType { get; set; }
+        public string QuestionType { get; set; }
 
-        public int? NumQuestions { get; set; }
+        public int NumQuestions { get; set; }
 
         public int? NumCorrectQuestions { get; set; }
 
         public int? NumWrongQuestions { get; set; }
 
-        public string? DifficultyLevel { get; set; }
+        public string DifficultyLevel { get; set; }
 
         public string? McqQuestionsData { get; set; }
 
@@ -27,12 +29,15 @@ namespace Learntendo_backend.Models
 
         public int? XpCollected { get; set; }
 
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
 
-        public int? SubjectId { get; set; }
+        public int SubjectId { get; set; }
 
+        [JsonIgnore]
+        [IgnoreDataMember]
         public Subject? Subject { get; set; }
-
+        [JsonIgnore]
+        [IgnoreDataMember]
         public User? User { get; set; }
     }
 }
