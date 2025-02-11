@@ -1,4 +1,5 @@
-﻿using Learntendo_backend.Models;
+﻿using System.Linq.Expressions;
+using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -63,6 +64,12 @@ namespace Learntendo_backend.Data
                 await _db.SaveChangesAsync();
             }
         }
+
+        //public async Task<bool> AnyAsync(Expression<Func<Exam, bool>> predicate)
+        //{
+        //    return await _db.Exam.AnyAsync(predicate);
+        //}
+
     }
 
 }
