@@ -45,6 +45,10 @@ namespace Learntendo_backend.Controllers
             await _subjectRepo.UpdateFun(subject);
             var user = await _userRepo.GetByIdFun(exam.UserId);
             user.TotalQuestion += exam.NumQuestions;
+            if (exam.XpCollected > 0)
+            {
+            user.TotalXp += exam.XpCollected;
+            }
             await _userRepo.UpdateFun(user);
 
             return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
@@ -85,6 +89,8 @@ namespace Learntendo_backend.Controllers
             await _subjectRepo.UpdateFun(subject);
             var user = await _userRepo.GetByIdFun(exam.UserId);
             user.TotalQuestion -= exam.NumQuestions;
+            user.TotalXp -= exam.XpCollected;
+            
             await _userRepo.UpdateFun(user);
             return Ok("Exam Deleted Successfully");
         }
