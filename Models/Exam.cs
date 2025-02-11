@@ -27,7 +27,7 @@ namespace Learntendo_backend.Models
 
         public int? TotalScore { get; set; }
 
-        public int? XpCollected { get; set; }
+        public int XpCollected { get; set; }
 
         public int UserId { get; set; }
 
