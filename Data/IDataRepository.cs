@@ -8,6 +8,8 @@ namespace Learntendo_backend.Data
         Task<List<Subject>> GetAllsubbyUserFun(int userId);
         Task<List<Exam>> GetAllExambysubFun(int subId);
         Task CheckDailyChallenge(int userId);
+        Task UpdatePostExamRelatedTable(int examId);
+        Task UpdateDeleteExamRelatedTable(int examId);
         Task<T> GetByIdFun(int id);
         Task AddFun(T entity);
         Task UpdateFun(T entity);
