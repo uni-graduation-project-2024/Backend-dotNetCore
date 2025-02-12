@@ -7,7 +7,7 @@ namespace Learntendo_backend.Data
         Task<IEnumerable<T>> GetAllFun();
         Task<List<Subject>> GetAllsubbyUserFun(int userId);
         Task<List<Exam>> GetAllExambysubFun(int subId);
-        //Task<bool> AnyAsync(Expression<Func<Exam, bool>> predicate);
+        Task CheckDailyChallenge(int userId);
         Task<T> GetByIdFun(int id);
         Task AddFun(T entity);
         Task UpdateFun(T entity);

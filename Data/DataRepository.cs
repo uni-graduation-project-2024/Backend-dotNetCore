@@ -64,11 +64,30 @@ namespace Learntendo_backend.Data
                 await _db.SaveChangesAsync();
             }
         }
+        public async Task CheckDailyChallenge(int userId)
+        {
+            var user = await _db.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null) return;
 
-        //public async Task<bool> AnyAsync(Expression<Func<Exam, bool>> predicate)
-        //{
-        //    return await _db.Exam.AnyAsync(predicate);
-        //}
+            var today = DateTime.UtcNow.Date;
+
+            
+            bool hasExamToday = await  _db.Exam.AnyAsync(e => e.UserId == userId && e.CreatedDate.Date == today);
+
+            if (hasExamToday)
+            {
+                user.CompleteDailyChallenge = true;
+                user.DateCompleteDailyChallenge = DateTime.UtcNow;
+            }
+            else if (user.DateCompleteDailyChallenge?.Date != today)
+            {
+               
+                user.CompleteDailyChallenge = false;
+                user.DateCompleteDailyChallenge = null;
+            }
+
+            await _db.SaveChangesAsync();
+        }
 
     }
 
