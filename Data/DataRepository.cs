@@ -122,7 +122,7 @@ namespace Learntendo_backend.Data
                             user.TotalXp -= exam.XpCollected;
                         }
 
-                        if (exam.CreatedDate == DateTime.UtcNow.Date)
+                        if (exam.CreatedDate.Date == DateTime.UtcNow.Date)
                         {
                             user.DailyXp -= exam.XpCollected;
                             user.NumQuestionSolToday -= exam.NumQuestions;
