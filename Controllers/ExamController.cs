@@ -40,6 +40,7 @@ namespace Learntendo_backend.Controllers
             }
             exam.CreatedDate = DateTime.Now;    
             await _examRepo.AddFun(exam);
+           
             var subject = await _subjectRepo.GetByIdFun(exam.SubjectId);
             subject.NumExams += 1;
             subject.TotalQuestions += exam.NumQuestions;
@@ -50,6 +51,7 @@ namespace Learntendo_backend.Controllers
             {
             user.TotalXp += exam.XpCollected;
             }
+            await _userRepo.CheckDailyChallenge(exam.UserId);
             await _userRepo.UpdateFun(user);
 
             return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
