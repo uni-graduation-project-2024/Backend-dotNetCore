@@ -41,21 +41,8 @@ namespace Learntendo_backend.Controllers
             exam.CreatedDate = DateTime.Now;    
             await _examRepo.AddFun(exam);
             await _examRepo.UpdatePostExamRelatedTable(exam.ExamId);
-            // var subject = await _subjectRepo.GetByIdFun(exam.SubjectId);
-            //subject.NumExams += 1;
-            //subject.TotalQuestions += exam.NumQuestions;
-            //await _subjectRepo.UpdateFun(subject);
-            //var user = await _userRepo.GetByIdFun(exam.UserId);
-            //user.TotalQuestion += exam.NumQuestions;
-            //if (exam.XpCollected > 0)
-            //{
-            //user.TotalXp += exam.XpCollected;
-            //}
-            //await _userRepo.CheckDailyChallenge(exam.UserId);
-            //await _userRepo.UpdateFun(user);
-
             return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
-            //return Ok("created Successfully");
+          
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetExamById(int id)
@@ -86,30 +73,6 @@ namespace Learntendo_backend.Controllers
             }
             await _examRepo.UpdateDeleteExamRelatedTable(id);
             await _examRepo.DeleteFun(id);
-            
-            //var subject = await _subjectRepo.GetByIdFun(exam.SubjectId);
-            //subject.NumExams -= 1;
-            //subject.TotalQuestions -= exam.NumQuestions;
-            //await _subjectRepo.UpdateFun(subject);
-            //var user = await _userRepo.GetByIdFun(exam.UserId);
-            //user.TotalQuestion -= exam.NumQuestions;
-            //user.TotalXp -= exam.XpCollected;
-            //if (exam.CreatedDate == DateTime.UtcNow.Date )
-            //{
-            //    user.DailyXp -= exam.XpCollected;
-            //    user.NumQuestionSolToday -= exam.NumQuestions;
-
-            //    int examCountToday = await _examRepo
-            //    .CountAsync(e => e.UserId == exam.UserId && e.CreatedDate.Date == DateTime.UtcNow.Date);
-
-            //    if (examCountToday == 1)
-            //    {
-            //       
-            //    }
-
-            //}
-
-            //await _userRepo.UpdateFun(user);
             return Ok("Exam Deleted Successfully");
         }
 
