@@ -63,11 +63,23 @@ namespace Learntendo_backend.Controllers
             var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
             return Ok(examDto);
         }
+        [HttpDelete("deleteprogress/{id}")]
+        public async Task<IActionResult> DeleteExamWithPrograss(int id)
+        {
+            var exam = await _examRepo.GetByIdFun(id);
+            if(exam == null)
+            {
+                return NotFound($"Exam with {id} not found");
+            }
+            await _examRepo.UpdateDeleteExamWithProgressRelatedTable(id);
+            await _examRepo.DeleteFun(id);
+            return Ok("Exam Deleted Successfully");
+        }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExam(int id)
         {
             var exam = await _examRepo.GetByIdFun(id);
-            if(exam == null)
+            if (exam == null)
             {
                 return NotFound($"Exam with {id} not found");
             }
@@ -75,7 +87,6 @@ namespace Learntendo_backend.Controllers
             await _examRepo.DeleteFun(id);
             return Ok("Exam Deleted Successfully");
         }
-
         [HttpPatch("{id}/{subId}")]
         public async Task<IActionResult> MoveExamToAnotherSub( int subId, [FromRoute] int id)
         {     
@@ -108,28 +119,7 @@ namespace Learntendo_backend.Controllers
             await _examRepo.UpdateFun(exam);
             return Ok("Exam moved successfully.");
         }
-        //public async Task<bool> CheckAndUpdateDailyChallenge(int userId)
-        //{
 
-        //    var today = DateTime.UtcNow.Date;
-
-        //    bool hasCreatedExamToday = await _examRepo.AnyAsync(exam =>
-        //        exam.UserId == userId && exam.CreatedDate.Date == today);
-
-
-        //    return hasCreatedExamToday;
-        //}
-        //public async Task UpdateUserDailyChallenge(int userId)
-        //{
-        //    var user = await _userRepo.GetByIdFun(userId);
-        //    if (user == null)
-        //    {
-        //        throw new Exception("User not found.");
-        //    }
-
-        //    user.CompleteDailyChallenge = await CheckAndUpdateDailyChallenge(userId);
-        //    await _userRepo.UpdateFun(user);
-        //}
 
 
     }
