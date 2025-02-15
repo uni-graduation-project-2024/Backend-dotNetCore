@@ -114,7 +114,7 @@ app.MapHangfireDashboard();
 using (var scope = app.Services.CreateScope())
 {
     var service = scope.ServiceProvider.GetRequiredService<DailyResetService>();
-    RecurringJob.AddOrUpdate("daily-reset", () => service.ResetDailyChallenges(), "*/3 * * * *");
+    RecurringJob.AddOrUpdate("daily-reset", () => service.ResetDailyChallenges(), "0 0 * * *");
 }
 //</summary>
 
