@@ -178,18 +178,17 @@ namespace Learntendo_backend.Data
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.NumQuestions);
             }
-            else if (user.DateCompleteDailyChallenge?.Date != today)
-            {
-                user.CompleteDailyChallenge = false;
-                user.DailyXp = 0;
-                user.NumQuestionSolToday = 0;
-            }
+            //else if (user.DateCompleteDailyChallenge?.Date != today)
+            //{
+            //    user.CompleteDailyChallenge = false;
+            //    user.DailyXp = 0;
+            //    user.NumQuestionSolToday = 0;
+            //}
 
             await _db.SaveChangesAsync();
         }
 
-
-
+ 
     }
 
 }
