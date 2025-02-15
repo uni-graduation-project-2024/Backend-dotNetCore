@@ -95,24 +95,30 @@ namespace Learntendo_backend.Data
 
             await _db.SaveChangesAsync();
         }
-
         public async Task UpdateDeleteExamRelatedTable(int examId)
+        {
+            var exam = await _db.Exam.FindAsync(examId);
+            if (exam == null) return;
+
+            var subject = await _db.Subject.FindAsync(exam.SubjectId);
+            if (subject != null)
+            {
+                subject.NumExams -= 1;
+                subject.TotalQuestions -= exam.NumQuestions;
+                _db.Subject.Update(subject);
+            }
+            await _db.SaveChangesAsync();
+        }
+        public async Task UpdateDeleteExamWithProgressRelatedTable(int examId)
         {
             using (var transaction = await _db.Database.BeginTransactionAsync())
             {
                 try
                 {
+
+                    await UpdateDeleteExamRelatedTable(examId);
                     var exam = await _db.Exam.FindAsync(examId);
                     if (exam == null) return;
-
-                    var subject = await _db.Subject.FindAsync(exam.SubjectId);
-                    if (subject != null)
-                    {
-                        subject.NumExams -= 1;
-                        subject.TotalQuestions -= exam.NumQuestions;
-                        _db.Subject.Update(subject);
-                    }
-
                     var user = await _db.User.FindAsync(exam.UserId);
                     if (user != null)
                     {
