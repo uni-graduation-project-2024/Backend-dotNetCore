@@ -8,21 +8,30 @@ using System.Security.Cryptography;
 using Learntendo_backend.Models;
 using System.Text;
 using Learntendo_backend.Mapping;
+using Learntendo_backend.Services;
+
+using Hangfire;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+//AddAutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-// Add services to the container.
+
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("defaultDbContext"));
 });
+////////////
 
+
+//jwtSettings
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSettings);
-// تحميل الإعدادات من appsettings.json
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-// إضافة الخدمات
+
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -57,6 +66,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             //////
         };
     });
+////////////
+///
 
 builder.Logging.AddConsole();
 builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -79,7 +90,34 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader());
 });
 
+
+
+
+builder.Services.AddHangfire(config =>
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings()
+          .UseSqlServerStorage(builder.Configuration.GetConnectionString("defaultDbContext")));
+
+
+builder.Services.AddHangfireServer();
+builder.Services.AddScoped<DailyResetService>();
+
+
+
 var app = builder.Build();
+//<summary>
+app.UseHangfireDashboard();
+app.MapHangfireDashboard();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var service = scope.ServiceProvider.GetRequiredService<DailyResetService>();
+    RecurringJob.AddOrUpdate("daily-reset", () => service.ResetDailyChallenges(), "*/3 * * * *");
+}
+//</summary>
+
 
 // استدعاء دالة SeedAdmin لإضافة Admin إذا لم يكن موجودًا
 using (var scope = app.Services.CreateScope())
