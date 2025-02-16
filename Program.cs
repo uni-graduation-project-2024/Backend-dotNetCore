@@ -110,7 +110,7 @@ var app = builder.Build();
 app.UseHangfireDashboard();
 app.MapHangfireDashboard();
 
-
+//https://localhost:7078/hangfire HangfireDashboard
 using (var scope = app.Services.CreateScope())
 {
     var service = scope.ServiceProvider.GetRequiredService<DailyResetService>();
