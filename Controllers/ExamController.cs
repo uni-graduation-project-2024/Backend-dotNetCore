@@ -24,30 +24,7 @@ namespace Learntendo_backend.Controllers
             _map = map;
         }
 
-        [HttpDelete("deleteprogress/{id}")]
-        public async Task<IActionResult> DeleteExamWithPrograss(int id)
-        {
-            var exam = await _examRepo.GetByIdFun(id);
-            if (exam == null)
-            {
-                return NotFound($"Exam with {id} not found");
-            }
-            await _examRepo.UpdateDeleteExamWithProgressRelatedTable(id);
-            await _examRepo.DeleteFun(id);
-            return Ok("Exam Deleted Successfully");
-        }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteExam(int id)
-        {
-            var exam = await _examRepo.GetByIdFun(id);
-            if (exam == null)
-            {
-                return NotFound($"Exam with {id} not found");
-            }
-            await _examRepo.UpdateDeleteExamRelatedTable(id);
-            await _examRepo.DeleteFun(id);
-            return Ok("Exam Deleted Successfully");
-        }
+
         [HttpPost]
         public async Task<IActionResult> CreateExam([FromBody] ExamDto examDto)
         {
@@ -89,7 +66,30 @@ namespace Learntendo_backend.Controllers
             var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
             return Ok(examDto);
         }
-
+        [HttpDelete("deleteprogress/{id}")]
+        public async Task<IActionResult> DeleteExamWithPrograss(int id)
+        {
+            var exam = await _examRepo.GetByIdFun(id);
+            if (exam == null)
+            {
+                return NotFound($"Exam with {id} not found");
+            }
+            await _examRepo.UpdateDeleteExamWithProgressRelatedTable(id);
+            await _examRepo.DeleteFun(id);
+            return Ok("Exam Deleted Successfully");
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteExam(int id)
+        {
+            var exam = await _examRepo.GetByIdFun(id);
+            if (exam == null)
+            {
+                return NotFound($"Exam with {id} not found");
+            }
+            await _examRepo.UpdateDeleteExamRelatedTable(id);
+            await _examRepo.DeleteFun(id);
+            return Ok("Exam Deleted Successfully");
+        }
         [HttpPatch("{id}/{subId}")]
         public async Task<IActionResult> MoveExamToAnotherSub(int subId, [FromRoute] int id)
         {
