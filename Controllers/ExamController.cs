@@ -89,40 +89,49 @@ namespace Learntendo_backend.Controllers
             var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
             return Ok(examDto);
         }
- 
-        //[HttpPatch("{id}/{subId}")]
-        //public async Task<IActionResult> MoveExamToAnotherSub( int subId, [FromRoute] int id)
-        //{     
-        //    var exam = await _examRepo.GetByIdFun(id);
-        //    if (exam == null)
-        //    {
-        //        return NotFound($"Exam with ID {id} not found.");
-        //    }         
-        //    var oldSubject = await _subjectRepo.GetByIdFun(exam.SubjectId);
 
-        //    if (oldSubject == null)
-        //    {
-        //        return NotFound($"Old Subject with ID {exam.SubjectId} not found.");
-        //    }
-        //    var newSubject = await _subjectRepo.GetByIdFun(subId);
-        //    if (newSubject == null)
-        //    {
-        //        return NotFound($"New Subject with ID {subId} not found.");
-        //    }      
-        //    oldSubject.NumExams -= 1;
-        //    oldSubject.TotalQuestions -= exam.NumQuestions;
-        //    if (oldSubject.NumExams < 0 || oldSubject.TotalQuestions < 0)
-        //    {
-        //        return BadRequest("The number of exams or number of TotalQuestions in the old subject cannot be negative.");
-        //    }
-        //    await _subjectRepo.UpdateFun(oldSubject);        
-        //    newSubject.NumExams += 1;
-        //    newSubject.TotalQuestions += exam.NumQuestions;
-        //    await _subjectRepo.UpdateFun(newSubject);
-        //    exam.SubjectId = subId;
-        //    await _examRepo.UpdateFun(exam);
-        //    return Ok("Exam moved successfully.");
-        //}
+        [HttpPatch("{id}/{subId}")]
+        public async Task<IActionResult> MoveExamToAnotherSub(int subId, [FromRoute] int id)
+        {
+            var exam = await _examRepo.GetByIdFun(id);
+            if (exam == null)
+            {
+                return NotFound($"Exam with ID {id} not found.");
+            }
+
+            if (exam.SubjectId != null)
+            {
+                var oldSubject = await _subjectRepo.GetByIdFun(exam.SubjectId);
+                if (oldSubject == null)
+                {
+                    return NotFound($"Old Subject with ID {exam.SubjectId} not found.");
+                }
+
+                oldSubject.NumExams -= 1;
+                oldSubject.TotalQuestions -= exam.NumQuestions;
+                if (oldSubject.NumExams < 0 || oldSubject.TotalQuestions < 0)
+                {
+                    return BadRequest("The number of exams or number of TotalQuestions in the old subject cannot be negative.");
+                }
+                await _subjectRepo.UpdateFun(oldSubject);
+            }
+
+            var newSubject = await _subjectRepo.GetByIdFun(subId);
+            if (newSubject == null)
+            {
+                return NotFound($"New Subject with ID {subId} not found.");
+            }
+
+            newSubject.NumExams += 1;
+            newSubject.TotalQuestions += exam.NumQuestions;
+            await _subjectRepo.UpdateFun(newSubject);
+
+            exam.SubjectId = subId;
+            await _examRepo.UpdateFun(exam);
+
+            return Ok("Exam moved successfully.");
+        }
+
 
 
 
