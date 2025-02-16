@@ -41,7 +41,7 @@ namespace Learntendo_backend.Data
                 throw new KeyNotFoundException($" id {id} not found");
             }
             return result;
-            
+        
         }
 
         public async Task AddFun(T entity)
@@ -69,15 +69,21 @@ namespace Learntendo_backend.Data
         {
             var exam = await _db.Exam.FindAsync(examId);
             if (exam == null) return;
-
-            var subject = await _db.Subject.FindAsync(exam.SubjectId);
-            if (subject != null)
+            if (exam.SubjectId != null)
             {
-                subject.NumExams += 1;
-                subject.TotalQuestions += exam.NumQuestions;
-                _db.Subject.Update(subject);
+                var subject = await _db.Subject.FindAsync(exam.SubjectId);
+                if (subject != null)
+                {
+                    subject.NumExams += 1;
+                    subject.TotalQuestions += exam.NumQuestions;
+                    _db.Subject.Update(subject);
+                }
+               
             }
-
+            else
+            {
+                exam.SubjectId = null;
+            }
             var user = await _db.User.FindAsync(exam.UserId);
             if (user != null)
             {
