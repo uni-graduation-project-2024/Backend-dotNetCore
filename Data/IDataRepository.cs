@@ -12,7 +12,7 @@ namespace Learntendo_backend.Data
         Task UpdatePostExamRelatedTable(int examId);
         Task UpdateDeleteExamRelatedTable(int examId);
         Task UpdateDeleteExamWithProgressRelatedTable(int examId);
-        Task<T> GetByIdFun(int id);
+        Task<T> GetByIdFun(int? id);
         Task AddFun(T entity);
         Task UpdateFun(T entity);
         Task DeleteFun(int id);

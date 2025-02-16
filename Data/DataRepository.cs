@@ -33,7 +33,7 @@ namespace Learntendo_backend.Data
 
 
 
-        public async Task<T> GetByIdFun(int id)
+        public async Task<T> GetByIdFun(int? id)
         {
             var result = await table.FindAsync(id);
             if (result == null)
