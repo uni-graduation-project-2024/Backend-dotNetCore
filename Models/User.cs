@@ -58,6 +58,7 @@ namespace Learntendo_backend.Models
         public DateTime JoinedDate { get; set; }
 
         public bool? IfStreakActive { get; set; }
+        public int? GroupId { get; set; }
         [JsonIgnore]
         [IgnoreDataMember]
         public ICollection<Subject> Subjects { get; set; } = new List<Subject>();

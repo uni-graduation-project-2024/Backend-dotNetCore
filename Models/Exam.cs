@@ -32,7 +32,7 @@ namespace Learntendo_backend.Models
 
         public int UserId { get; set; }
 
-        public int SubjectId { get; set; }
+        public int? SubjectId { get; set; }
 
         [JsonIgnore]
         [IgnoreDataMember]
