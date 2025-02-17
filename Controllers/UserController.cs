@@ -69,15 +69,19 @@ namespace Learntendo_backend.Controllers
 
         [HttpGet("user-profile")]
         // [Authorize(Roles = "Admin")]  // Ensure only admins can view users
-        public async Task<IActionResult> ViewUsers(int id)
+        public async Task<IActionResult> userProfile(int userId)
         {
-            var user = await _userRepo.GetByIdFun(id);
-            if (user == null)
-            {
-                return NotFound($"No user found with this id");
-            }
 
-            return Ok(user);
+            try
+            {
+                var user = await _userRepo.GetByIdFun(userId);
+
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return NotFound($"No user found with this ID: {userId}");
+            }
         }
     }
 }
