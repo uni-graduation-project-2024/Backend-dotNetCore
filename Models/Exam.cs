@@ -9,6 +9,8 @@ namespace Learntendo_backend.Models
         [Key]
         public int ExamId { get; set; }
 
+        public required string ExamName { get; set; }
+
         public string QuestionType { get; set; }
 
         public int NumQuestions { get; set; }

@@ -4,7 +4,9 @@
     {
         public class ExamDto
         {
-            public string? QuestionType { get; set; } 
+            public string? QuestionType { get; set; }
+            
+            public string? ExamName { get; set; }
             public int? NumQuestions { get; set; }
             public int? NumCorrectQuestions { get; set; }
             public int? NumWrongQuestions { get; set; }
