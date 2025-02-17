@@ -29,18 +29,16 @@ namespace Learntendo_backend.Controllers
         public async Task<IActionResult> CreateExam([FromBody] ExamDto examDto)
         {
             var exam = _map.Map<Exam>(examDto);
-            if (examDto.SubjectId == 0)
-            {
-                exam.SubjectId = null; 
-            }
-            if (examDto.QuestionType == "MCQ")
-            {
-                exam.TfQuestionsData = null;
-            }
-            if (examDto.QuestionType == "TF")
-            {
-                exam.McqQuestionsData = null;
-            }
+            exam.TfQuestionsData = null;
+
+            //if (examDto.QuestionType == "MCQ")
+            //{
+            //    exam.TfQuestionsData = null;
+            //}
+            //if (examDto.QuestionType == "TF")
+            //{
+            //    exam.McqQuestionsData = null;
+            //}
             exam.CreatedDate = DateTime.Now;    
             await _examRepo.AddFun(exam);
             await _examRepo.UpdatePostExamRelatedTable(exam.ExamId);
@@ -58,13 +56,21 @@ namespace Learntendo_backend.Controllers
             var examDto = _map.Map<ExamDto>(exam);
             return Ok(examDto);
         }
-        [HttpGet("all/{subId}")]
-        public async Task<IActionResult> GetAllExamBySubId(int subId)
-        {
-            var exams = await _examRepo.GetAllExambysubFun(subId);
+        //[HttpGet("all/{subId}")]
+        //public async Task<IActionResult> GetAllExamBySubId(int subId)
+        //{
+        //    var exams = await _examRepo.GetAllExambysubFun(subId);
   
-            var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
-            return Ok(examDto);
+        //    var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
+        //    return Ok(examDto);
+        //}
+        [HttpGet("all/{userId}")]
+        public async Task<IActionResult> GetAllExamByUserId(int userId,[FromQuery] int? subId=null)
+        {
+            var exams = await _examRepo.GetAllExambyUserFun(userId, subId);
+
+            var viewExamDto = _map.Map<IEnumerable<ViewExamDto>>(exams);
+            return Ok(viewExamDto);
         }
         [HttpDelete("deleteprogress/{id}")]
         public async Task<IActionResult> DeleteExamWithPrograss(int id)
