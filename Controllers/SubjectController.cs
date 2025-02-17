@@ -32,9 +32,9 @@ namespace Learntendo_backend.Controllers
             var subjects = await _subjectRepo.GetAllsubbyUserFun(userId);
 
         
-            var subjectDto = _map.Map<IEnumerable<SubjectDto>>(subjects);
+            //var subjectDto = _map.Map<IEnumerable<SubjectDto>>(subjects);
 
-            return Ok(subjectDto);
+            return Ok(subjects);
         }
 
       
