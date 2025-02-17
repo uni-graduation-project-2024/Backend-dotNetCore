@@ -15,6 +15,10 @@ namespace Learntendo_backend.Mapping
 
             CreateMap<SubjectDto, Subject>();
 
+            CreateMap<Exam, ViewExamDto>();
+
+            CreateMap<ViewExamDto, Exam>();
+
             CreateMap<ExamDto, Exam>()
             .ForMember(dest => dest.McqQuestionsData, opt => opt.MapFrom(src =>
                 src.McqQuestionsData != null ? JsonConvert.SerializeObject(src.McqQuestionsData) : null))
