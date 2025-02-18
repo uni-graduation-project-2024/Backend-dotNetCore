@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace Learntendo_backend.Models
 {
@@ -17,9 +19,13 @@ namespace Learntendo_backend.Models
         [ForeignKey(nameof(User))]
         public required int UserId { get; set; }
 
+        [JsonIgnore]
+        [IgnoreDataMember]
         public ICollection<Exam> Exams { get; set; } = new List<Exam>();
 
         [Required]
+        [JsonIgnore]
+        [IgnoreDataMember]
         public required User User { get; set; }
     }
 }

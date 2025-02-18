@@ -1,4 +1,6 @@
-﻿using Learntendo_backend.Models;
+﻿using System.Linq.Expressions;
+using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
+using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -24,18 +26,14 @@ namespace Learntendo_backend.Data
         {
             return await _db.Subject.Where(x=>x.UserId == userId).ToListAsync();
         }
-        public async Task<Subject> GetSubbyUserFun(int id)
+        public async Task<List<Exam>> GetAllExambysubFun(int subId)
         {
-            var result = await _db.Subject.FirstOrDefaultAsync(x => x.SubjectId == id );
-            if (result == null)
-            {
-                throw new KeyNotFoundException($" id {id} not found");
-            }
-            return result;
+            return await _db.Exam.Where(x => x.SubjectId == subId).ToListAsync();
         }
 
 
-        public async Task<T> GetByIdFun(int id)
+
+        public async Task<T> GetByIdFun(int? id)
         {
             var result = await table.FindAsync(id);
             if (result == null)
@@ -43,7 +41,7 @@ namespace Learntendo_backend.Data
                 throw new KeyNotFoundException($" id {id} not found");
             }
             return result;
-            
+        
         }
 
         public async Task AddFun(T entity)
@@ -67,6 +65,142 @@ namespace Learntendo_backend.Data
                 await _db.SaveChangesAsync();
             }
         }
+        public async Task UpdatePostExamRelatedTable(int examId)
+        {
+            var exam = await _db.Exam.FindAsync(examId);
+            if (exam == null) return;
+            if (exam.SubjectId != null)
+            {
+                var subject = await _db.Subject.FindAsync(exam.SubjectId);
+                if (subject != null)
+                {
+                    subject.NumExams += 1;
+                    subject.TotalQuestions += exam.NumQuestions;
+                    _db.Subject.Update(subject);
+                }
+               
+            }
+            else
+            {
+                exam.SubjectId = null;
+            }
+            var user = await _db.User.FindAsync(exam.UserId);
+            if (user != null)
+            {
+                user.TotalQuestion += exam.NumQuestions;
+                if (exam.XpCollected > 0)
+                {
+                    user.TotalXp += exam.XpCollected;
+                }
+
+              
+                await CheckDailyChallenge(user.UserId);
+
+                _db.User.Update(user);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+        public async Task UpdateDeleteExamRelatedTable(int examId)
+        {
+            var exam = await _db.Exam.FindAsync(examId);
+            if (exam == null) return;
+
+            var subject = await _db.Subject.FindAsync(exam.SubjectId);
+            if (subject != null)
+            {
+                subject.NumExams -= 1;
+                subject.TotalQuestions -= exam.NumQuestions;
+                _db.Subject.Update(subject);
+            }
+            await _db.SaveChangesAsync();
+        }
+        public async Task UpdateDeleteExamWithProgressRelatedTable(int examId)
+        {
+            using (var transaction = await _db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+
+                    await UpdateDeleteExamRelatedTable(examId);
+                    var exam = await _db.Exam.FindAsync(examId);
+                    if (exam == null) return;
+                    var user = await _db.User.FindAsync(exam.UserId);
+                    if (user != null)
+                    {
+                        user.TotalQuestion -= exam.NumQuestions;
+                        if (exam.XpCollected > 0)
+                        {
+                            user.TotalXp -= exam.XpCollected;
+                        }
+
+                        if (exam.CreatedDate.Date == DateTime.UtcNow.Date)
+                        {
+                            user.DailyXp -= exam.XpCollected;
+                            user.NumQuestionSolToday -= exam.NumQuestions;
+
+                            int examCountToday = await _db.Exam
+                                .CountAsync(e => e.UserId == exam.UserId && e.CreatedDate.Date == DateTime.UtcNow.Date);
+
+                            if (examCountToday == 1)
+                            {
+                                user.CompleteDailyChallenge = false;
+                                user.DateCompleteDailyChallenge = null;
+                                user.DailyXp = 0;
+                                user.NumQuestionSolToday = 0;
+                                user.StreakScore -= 1;
+                            }
+                        }
+
+                        _db.User.Update(user);
+                    }
+
+                    await _db.SaveChangesAsync();
+                    await transaction.CommitAsync();  
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();  
+                    throw; 
+                }
+            }
+        }
+
+        public async Task CheckDailyChallenge(int userId)
+        {
+            var user = await _db.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null) return;
+
+            var today = DateTime.UtcNow.Date;
+
+            
+            bool hasExamToday = await _db.Exam
+                .AnyAsync(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0);
+
+            if (hasExamToday)
+            {
+                user.CompleteDailyChallenge = true;
+                user.DateCompleteDailyChallenge = DateTime.UtcNow;
+
+           
+                user.DailyXp = await _db.Exam
+                    .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
+                    .SumAsync(e => e.XpCollected);
+
+                user.NumQuestionSolToday = await _db.Exam
+                    .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
+                    .SumAsync(e => e.NumQuestions);
+            }
+            //add StreakScore
+            var existexam = await _db.Exam.CountAsync(e => e.UserId == userId && e.CreatedDate.Date == today);
+            if(existexam == 1)
+            {
+                user.StreakScore += 1;
+            }
+            await _db.SaveChangesAsync();
+        }
+
+ 
     }
 
 }

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 
 namespace Learntendo_backend.Models
@@ -59,9 +61,12 @@ namespace Learntendo_backend.Models
         public DateTime JoinedDate { get; set; }
 
         public bool? IfStreakActive { get; set; }
-
+        public int? GroupId { get; set; }
+        [JsonIgnore]
+        [IgnoreDataMember]
         public ICollection<Subject> Subjects { get; set; } = new List<Subject>();
-
+        [JsonIgnore]
+        [IgnoreDataMember]
         public ICollection<Exam> Exams { get; set; } = new List<Exam>();
 
         

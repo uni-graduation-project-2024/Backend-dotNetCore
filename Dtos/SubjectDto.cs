@@ -6,7 +6,5 @@ namespace Learntendo_backend.Dtos
     {
         [Required]
         public string SubjectName { get; set; }
-        public int NumExams { get; set; }
-        public int TotalQuestions { get; set; }
     }
 }
