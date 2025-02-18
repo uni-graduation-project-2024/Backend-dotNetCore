@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
 using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -29,6 +30,24 @@ namespace Learntendo_backend.Data
         public async Task<List<Exam>> GetAllExambysubFun(int subId)
         {
             return await _db.Exam.Where(x => x.SubjectId == subId).ToListAsync();
+        }
+        public async Task<List<Exam>> GetAllExambyUserFun(int userId, int? subId= null)
+        {
+            var query = _db.Exam.Where(x => x.UserId == userId);
+
+            if (subId.HasValue)
+            {
+                if (subId.Value == -1)
+                {
+                    query = query.Where(x => x.SubjectId == null);
+                }
+                else
+                {
+                    query = query.Where(x => x.SubjectId == subId.Value);
+                }
+            }
+
+            return await query.ToListAsync();
         }
 
 

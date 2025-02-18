@@ -16,11 +16,12 @@ namespace Learntendo_backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly DataContext _context;
-       
-        public UserController(DataContext context)
+        private readonly IDataRepository<User> _userRepo;
+
+        public UserController(DataContext context, IDataRepository<User> userRepo)
         {
             _context = context;
-          
+            _userRepo = userRepo;
         }
 
         [HttpPost("change-password")]
@@ -66,8 +67,22 @@ namespace Learntendo_backend.Controllers
             }
         }
 
+        [HttpGet("user-profile")]
+        // [Authorize(Roles = "Admin")]  // Ensure only admins can view users
+        public async Task<IActionResult> userProfile(int userId)
+        {
 
-       
+            try
+            {
+                var user = await _userRepo.GetByIdFun(userId);
+
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return NotFound($"No user found with this ID: {userId}");
+            }
+        }
     }
 }
 
