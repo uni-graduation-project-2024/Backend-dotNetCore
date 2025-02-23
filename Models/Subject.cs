@@ -8,7 +8,7 @@ namespace Learntendo_backend.Models
     public class Subject
     {
         [Key]
-        public int SubjectId { get; set; }
+        public int? SubjectId { get; set; }
 
         [Required]
         public required string SubjectName { get; set; }

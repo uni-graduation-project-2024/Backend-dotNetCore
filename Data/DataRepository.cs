@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Runtime.ConstrainedExecution;
 using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
 using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -12,11 +13,12 @@ namespace Learntendo_backend.Data
     {
         private readonly DataContext _db;
         private readonly DbSet<T> table;
+        private object _logger;
 
         public DataRepository(DataContext db)
         {
-           _db = db;
-            table =_db.Set<T>();
+            _db = db;
+            table = _db.Set<T>();
         }
 
         public async Task<IEnumerable<T>> GetAllFun()
@@ -25,13 +27,13 @@ namespace Learntendo_backend.Data
         }
         public async Task<List<Subject>> GetAllsubbyUserFun(int userId)
         {
-            return await _db.Subject.Where(x=>x.UserId == userId).ToListAsync();
+            return await _db.Subject.Where(x => x.UserId == userId).ToListAsync();
         }
         public async Task<List<Exam>> GetAllExambysubFun(int subId)
         {
             return await _db.Exam.Where(x => x.SubjectId == subId).ToListAsync();
         }
-        public async Task<List<Exam>> GetAllExambyUserFun(int userId, int? subId= null)
+        public async Task<List<Exam>> GetAllExambyUserFun(int userId, int? subId = null)
         {
             var query = _db.Exam.Where(x => x.UserId == userId);
 
@@ -60,7 +62,7 @@ namespace Learntendo_backend.Data
                 throw new KeyNotFoundException($" id {id} not found");
             }
             return result;
-        
+
         }
 
         public async Task AddFun(T entity)
@@ -97,7 +99,7 @@ namespace Learntendo_backend.Data
                     subject.TotalQuestions += exam.NumQuestions;
                     _db.Subject.Update(subject);
                 }
-               
+
             }
             else
             {
@@ -110,9 +112,10 @@ namespace Learntendo_backend.Data
                 if (exam.XpCollected > 0)
                 {
                     user.TotalXp += exam.XpCollected;
+                    /////////////////////////////////////////
+                    user.WeeklyXp += exam.XpCollected;
                 }
 
-              
                 await CheckDailyChallenge(user.UserId);
 
                 _db.User.Update(user);
@@ -151,6 +154,8 @@ namespace Learntendo_backend.Data
                         if (exam.XpCollected > 0)
                         {
                             user.TotalXp -= exam.XpCollected;
+                            /////////////////////////////////////////
+                            user.WeeklyXp += exam.XpCollected;
                         }
 
                         if (exam.CreatedDate.Date == DateTime.UtcNow.Date)
@@ -175,15 +180,17 @@ namespace Learntendo_backend.Data
                     }
 
                     await _db.SaveChangesAsync();
-                    await transaction.CommitAsync();  
+                    await transaction.CommitAsync();
                 }
                 catch (Exception)
                 {
-                    await transaction.RollbackAsync();  
-                    throw; 
+                    await transaction.RollbackAsync();
+                    throw;
                 }
             }
         }
+
+    
 
         public async Task CheckDailyChallenge(int userId)
         {
@@ -192,34 +199,86 @@ namespace Learntendo_backend.Data
 
             var today = DateTime.UtcNow.Date;
 
-            
+            var oldLastExamDate = user.LastExamDate;
+            // جلب أحدث امتحان للمستخدم
+            var latestExam = await _db.Exam
+                .Where(e => e.UserId == userId)
+                .OrderByDescending(e => e.CreatedDate)
+                .FirstOrDefaultAsync();
+
+            // تحديث تاريخ آخر امتحان إذا كان هناك امتحان جديد اليوم
+            if (latestExam != null && latestExam.CreatedDate.Date == today)
+            {
+                user.LastExamDate = latestExam.CreatedDate; // تحديث التاريخ إلى أحدث امتحان
+            }
+
             bool hasExamToday = await _db.Exam
                 .AnyAsync(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0);
 
             if (hasExamToday)
             {
                 user.CompleteDailyChallenge = true;
-                user.DateCompleteDailyChallenge = DateTime.UtcNow;
+                user.DateCompleteDailyChallenge = today;
 
-           
                 user.DailyXp = await _db.Exam
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.XpCollected);
-
+                /////////////////////////////////////////
+                user.WeeklyXp = await _db.Exam
+                   .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
+                   .SumAsync(e => e.XpCollected);
+                ///////////////////////////////////////////////
                 user.NumQuestionSolToday = await _db.Exam
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.NumQuestions);
             }
-            //add StreakScore
-            var existexam = await _db.Exam.CountAsync(e => e.UserId == userId && e.CreatedDate.Date == today);
-            if(existexam == 1)
+            else
+            {
+
+
+                if (user.FreezeStreak > 0)
+                {
+                    user.FreezeStreak -= 1;
+                }
+                else
+                {
+                    user.StreakScore = 0;
+                }
+
+            }
+
+            // تحديث Streak Score
+            var existexam = await _db.Exam.CountAsync(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0);
+
+            if (existexam == 1 && (oldLastExamDate == null || oldLastExamDate?.Date != today))
             {
                 user.StreakScore += 1;
+                user.LastExamDate = today; // تحديث تاريخ آخر زيادة لـ StreakScore
             }
+
+
             await _db.SaveChangesAsync();
         }
 
- 
-    }
+        public Task UpdatePostExamRelatedTable(object examId)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task CheckDailyChallengeForAllUsers()
+        {
+            var users = await _db.User.Select(u => u.UserId).ToListAsync();
 
+            foreach (var userId in users)
+            {
+                await CheckDailyChallenge(userId);
+            }
+
+            await _db.SaveChangesAsync(); // حفظ التغييرات بعد تعديل جميع المستخدمين
+        }
+
+
+    }
 }
+
+
+

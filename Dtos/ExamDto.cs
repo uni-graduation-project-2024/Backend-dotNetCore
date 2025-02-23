@@ -1,4 +1,6 @@
-﻿namespace Learntendo_backend.Dtos
+﻿using System.Text.Json.Serialization;
+
+namespace Learntendo_backend.Dtos
 {
     namespace Learntendo_backend.DTOs
     {
@@ -19,7 +21,9 @@
             public List<TfQuestionDto>? TfQuestionsData { get; set; }
 
             public TimeOnly? TimeTaken { get; set; }
+            
             public int? TotalScore { get; set; }
+            
             public int XpCollected { get; set; }
             public int? UserId { get; set; }
             public int? SubjectId { get; set; }

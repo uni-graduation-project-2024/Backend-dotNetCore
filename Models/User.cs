@@ -55,6 +55,7 @@ namespace Learntendo_backend.Models
 
         public DateTime? DateCompleteMonthlyChallenge { get; set; }
 
+        public DateTime? LastExamDate { get; set; }
 
 
         [Required]
@@ -69,11 +70,11 @@ namespace Learntendo_backend.Models
         [IgnoreDataMember]
         public ICollection<Exam> Exams { get; set; } = new List<Exam>();
 
-        
+        public Group Group { get; set; }
 
 
-       
 
-      
+
+
     }
 }

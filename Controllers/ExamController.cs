@@ -3,8 +3,11 @@ using Azure;
 using Learntendo_backend.Data;
 using Learntendo_backend.Dtos;
 using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
+using Learntendo_backend.Migrations;
 using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Learntendo_backend.Controllers
 {
@@ -16,12 +19,15 @@ namespace Learntendo_backend.Controllers
         private readonly IDataRepository<Subject> _subjectRepo;
         private readonly IDataRepository<User> _userRepo;
         private readonly IMapper _map;
-        public ExamController(IDataRepository<Subject> subjectRepo, IDataRepository<Exam> examRepo, IDataRepository<User> userRepo, IMapper map)
+        private readonly DataContext _db;
+
+        public ExamController(IDataRepository<Subject> subjectRepo, IDataRepository<Exam> examRepo, IDataRepository<User> userRepo, IMapper map, DataContext db)
         {
             _userRepo = userRepo;
             _examRepo = examRepo;
             _subjectRepo = subjectRepo;
             _map = map;
+            _db = db;
         }
 
 
@@ -39,17 +45,19 @@ namespace Learntendo_backend.Controllers
             //{
             //    exam.McqQuestionsData = null;
             //}
-            exam.CreatedDate = DateTime.Now;    
+            exam.CreatedDate = DateTime.Now;
             await _examRepo.AddFun(exam);
             await _examRepo.UpdatePostExamRelatedTable(exam.ExamId);
             return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
-          
         }
-        [HttpGet("{id}")]
+
+
+
+            [HttpGet("{id}")]
         public async Task<IActionResult> GetExamById(int id)
         {
             var exam = await _examRepo.GetByIdFun(id);
-            if(exam == null)
+            if (exam == null)
             {
                 return NotFound($"Exam with {id} not found");
             }
@@ -60,12 +68,12 @@ namespace Learntendo_backend.Controllers
         //public async Task<IActionResult> GetAllExamBySubId(int subId)
         //{
         //    var exams = await _examRepo.GetAllExambysubFun(subId);
-  
+
         //    var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
         //    return Ok(examDto);
         //}
         [HttpGet("all/{userId}")]
-        public async Task<IActionResult> GetAllExamByUserId(int userId,[FromQuery] int? subId=null)
+        public async Task<IActionResult> GetAllExamByUserId(int userId, [FromQuery] int? subId = null)
         {
             var exams = await _examRepo.GetAllExambyUserFun(userId, subId);
 
@@ -137,9 +145,9 @@ namespace Learntendo_backend.Controllers
 
             return Ok("Exam moved successfully.");
         }
-
-
-
+  
 
     }
 }
+
+

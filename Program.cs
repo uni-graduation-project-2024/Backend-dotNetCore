@@ -9,11 +9,16 @@ using Learntendo_backend.Models;
 using System.Text;
 using Learntendo_backend.Mapping;
 using Learntendo_backend.Services;
-
 using Hangfire;
+using Microsoft.AspNetCore.Mvc;
+using static DatabaseSeeder;
+using System;
+//using Learntendo_backend.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
+/////////////////
+builder.Services.AddSignalR();
 
 //AddAutoMapper
 builder.Services.AddControllers();
@@ -123,13 +128,30 @@ builder.Services.AddHangfire(config =>
 
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<DailyResetService>();
+builder.Services.AddScoped<GroupService>();
 
 
 
 var app = builder.Build();
 //<summary>
+
+app.UseHangfireServer();
 app.UseHangfireDashboard();
+
 app.MapHangfireDashboard();
+app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<GroupService>(
+    job => job.AssignUsersToGroups(),
+    Cron.Weekly(DayOfWeek.Saturday, 0, 0));
+
+
+RecurringJob.AddOrUpdate<DataRepository<User>>(
+    "daily-challenge-check",
+    repo => repo.CheckDailyChallengeForAllUsers(),
+    Cron.Daily(0, 0) 
+);
+
 
 //https://localhost:7078/hangfire HangfireDashboard
 using (var scope = app.Services.CreateScope())
@@ -175,8 +197,9 @@ app.MapControllers();
 app.UseEndpoints(endpoints =>
 {    });
 
-
+//app.MapHub<LeaderboardHub>("/leaderboardHub");
 app.MapControllers();
+
 app.Run();
 
 // دالة SeedAdmin لإضافة Admin تلقائيًا إذا لم يكن موجودًا
@@ -228,5 +251,5 @@ public static class DatabaseSeeder
         }
     }
 
-   
+
 }
