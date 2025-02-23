@@ -15,7 +15,7 @@ namespace Learntendo_backend.Data
 
         public DbSet<Admin> Admin { get; set; }
 
-       
+        public DbSet<Group> Group { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

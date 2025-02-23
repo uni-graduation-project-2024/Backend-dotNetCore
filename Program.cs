@@ -11,9 +11,14 @@ using Learntendo_backend.Mapping;
 using Learntendo_backend.Services;
 
 using Hangfire;
+using Microsoft.AspNetCore.Mvc;
+using static DatabaseSeeder;
+using Learntendo_backend.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
+/////////////////
+builder.Services.AddSignalR();
 
 //AddAutoMapper
 builder.Services.AddControllers();
@@ -123,6 +128,7 @@ builder.Services.AddHangfire(config =>
 
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<DailyResetService>();
+builder.Services.AddScoped<GroupService>();
 
 
 
@@ -175,8 +181,9 @@ app.MapControllers();
 app.UseEndpoints(endpoints =>
 {    });
 
-
+app.MapHub<LeaderboardHub>("/leaderboardHub");
 app.MapControllers();
+
 app.Run();
 
 // دالة SeedAdmin لإضافة Admin تلقائيًا إذا لم يكن موجودًا
@@ -228,5 +235,5 @@ public static class DatabaseSeeder
         }
     }
 
-   
+
 }
