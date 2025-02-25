@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
 using Learntendo_backend.Models;
 
 namespace Learntendo_backend.Data
