@@ -11,7 +11,7 @@ namespace Learntendo_backend.Data
         public  DbSet<Exam> Exam { get; set; }
 
         public  DbSet<Subject> Subject { get; set; }
-
+        public DbSet<Files> Files { get; set; }
         public DbSet<User> User { get; set; }
 
         public DbSet<Admin> Admin { get; set; }
