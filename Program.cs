@@ -103,6 +103,7 @@ builder.Services.AddHangfire(config =>
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<DailyResetService>();
 
+builder.WebHost.UseWebRoot("wwwroot");
 
 
 var app = builder.Build();
