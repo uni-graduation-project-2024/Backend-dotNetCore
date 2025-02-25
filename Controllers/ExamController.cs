@@ -64,6 +64,7 @@ namespace Learntendo_backend.Controllers
         //    var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
         //    return Ok(examDto);
         //}
+        //NEW
         [HttpGet("all/{userId}")]
         public async Task<IActionResult> GetAllExamByUserId(int userId,[FromQuery] int? subId=null)
         {
