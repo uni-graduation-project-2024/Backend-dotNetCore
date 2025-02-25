@@ -36,7 +36,7 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
-builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
+//builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
 
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
