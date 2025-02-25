@@ -31,6 +31,7 @@ namespace Learntendo_backend.Data
         {
             return await _db.Exam.Where(x => x.SubjectId == subId).ToListAsync();
         }
+       //NEW
         public async Task<List<Exam>> GetAllExambyUserFun(int userId, int? subId= null)
         {
             var query = _db.Exam.Where(x => x.UserId == userId);
