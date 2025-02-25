@@ -8,7 +8,7 @@ namespace Learntendo_backend.Models
     {
         [Key]
         public int ExamId { get; set; }
-
+        //NEW
         public required string ExamName { get; set; }
 
         public string QuestionType { get; set; }
@@ -31,11 +31,15 @@ namespace Learntendo_backend.Models
 
         public int XpCollected { get; set; }
         public DateTime CreatedDate { get; set; }
-
+        public int FileId {  get; set; } 
+        
         public int UserId { get; set; }
 
         public int? SubjectId { get; set; }
 
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public File? File { get; set; }
         [JsonIgnore]
         [IgnoreDataMember]
         public Subject? Subject { get; set; }
