@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
@@ -31,15 +32,17 @@ namespace Learntendo_backend.Models
 
         public int XpCollected { get; set; }
         public DateTime CreatedDate { get; set; }
-        public int FileId {  get; set; } 
-        
+
+        //we must to make the forign key nullable to avoid migrations problem
+        [ForeignKey("FileId")]
+        public int? FileId { get; set; }
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public Files? File { get; set; }
         public int UserId { get; set; }
 
         public int? SubjectId { get; set; }
 
-        [JsonIgnore]
-        [IgnoreDataMember]
-        public File? File { get; set; }
         [JsonIgnore]
         [IgnoreDataMember]
         public Subject? Subject { get; set; }
