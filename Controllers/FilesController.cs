@@ -23,7 +23,7 @@ namespace Learntendo_backend.Controllers
             _mapper = mapper;
         }
         [HttpPost("Upload")]
-        public async Task<IActionResult> UploadFile([FromBody] FilesDto file)
+        public async Task<IActionResult> UploadFile([FromForm] FilesDto file)
         {
             if (file == null || file.File.Length == 0)
             {
@@ -58,8 +58,8 @@ namespace Learntendo_backend.Controllers
 
             await _filerepo.AddFun(fileRecord);
 
-           // return Ok(new { message = "تم تحميل الملف بنجاح.", path = fileRecord.FilePath });
-            return View(file);
+            return Ok(new { message = "File Uploaded Successfully.", path = fileRecord.FilePath });
+            //return View(file);
         }
     }
 }
