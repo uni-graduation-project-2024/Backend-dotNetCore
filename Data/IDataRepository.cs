@@ -6,6 +6,7 @@ namespace Learntendo_backend.Data
     {
 
         Task<IEnumerable<T>> GetAllFun();
+        Task ChecknumofgeneratedFile(int userId);
         Task<List<Subject>> GetAllsubbyUserFun(int userId);
         //NEW
         Task<List<Exam>> GetAllExambysubFun(int subId);
