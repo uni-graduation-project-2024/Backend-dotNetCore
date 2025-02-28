@@ -55,6 +55,28 @@ namespace Learntendo_backend.Controllers
             return Ok(new { message = "File Uploaded Successfully.", path = fileRecord.FilePath });
          
         }
+        [HttpGet("download/{FileId}")]
+        public async Task<IActionResult> Download(int FileId)
+        {
+            var fileRecord = await _filerepo.GetByIdFun(FileId);
+            if (fileRecord?.FilePath == null)
+            {
+                return NotFound("File not found.");
+            }
+
+            var fileName = Path.GetFileName(fileRecord.FilePath); 
+            var filePath = Path.Combine(_env.WebRootPath, "uploads", fileName);
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound($"File not found: {filePath}");
+            }
+
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            return File(fileBytes, "application/octet-stream", fileName);
+        }
+
+
 
     }
 }
