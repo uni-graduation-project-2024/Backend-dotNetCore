@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
 using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
@@ -52,7 +53,10 @@ namespace Learntendo_backend.Data
         }
 
 
-
+        //public async Task ChecknumofgeneratedFile()
+        //{
+        //    return 
+        //}
         public async Task<T> GetByIdFun(int? id)
         {
             var result = await table.FindAsync(id);
