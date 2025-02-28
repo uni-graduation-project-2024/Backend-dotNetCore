@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Learntendo_backend.Dtos;
 using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Learntendo_backend.Controllers
 {
@@ -13,14 +14,16 @@ namespace Learntendo_backend.Controllers
     {
 
         private readonly IDataRepository<Files> _filerepo;
+        private readonly IDataRepository<User> _userrepo;
         private readonly IWebHostEnvironment _env;
         private readonly IMapper _mapper;
 
-        public FilesController(IDataRepository<Files> filerepo, IMapper mapper , IWebHostEnvironment env)
+        public FilesController(IDataRepository<Files> filerepo, IDataRepository<User> userrepo, IMapper mapper , IWebHostEnvironment env)
         {
             _env = env;
             _filerepo = filerepo;
             _mapper = mapper;
+            _userrepo = userrepo;
         }
        
 
@@ -51,8 +54,12 @@ namespace Learntendo_backend.Controllers
             {
                 FileName = file.File.FileName,
                 FilePath = $"/uploads/{uniqueFileName}",
-                CreatedDate = DateTime.Now
+                CreatedDate = DateTime.Now,
+                UserId = file.UserId
             };
+
+            await _userrepo.ChecknumofgeneratedFile(file.UserId);
+             
 
             await _filerepo.AddFun(fileRecord);
 
