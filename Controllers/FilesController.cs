@@ -53,47 +53,8 @@ namespace Learntendo_backend.Controllers
             await _filerepo.AddFun(fileRecord);
 
             return Ok(new { message = "File Uploaded Successfully.", path = fileRecord.FilePath });
-            //return View(file);
+         
         }
 
-
-     
-
-        //[HttpPost("upload")]
-        //public async Task<IActionResult> Upload([FromForm] FileUploadDto filedto)
-        //{
-        //    if (filedto.file == null || filedto.file.Length == 0)
-        //        return BadRequest("الملف غير موجود.");
-
-        //    var filefolder = Path.Combine(_env.WebRootPath, "uploads");
-
-        //    if (!Directory.Exists(filefolder))
-        //    {
-        //        Directory.CreateDirectory(filefolder);
-        //    }
-
-        //    //if you need uniqename
-        //    //var uniqueFileName = $"{Guid.NewGuid()}_{filedto.file.FileName}";
-        //    var filepath = Path.Combine(filefolder, filedto.file.FileName);
-
-
-        //    using (var stream = new FileStream(filepath, FileMode.Create))
-        //    {
-        //        await filedto.file.CopyToAsync(stream);
-        //    }
-
-
-        //    var fileRecord = new Files
-        //    {
-        //        FileName = filedto.file.FileName,
-        //        FilePath = $"/uploads/{filedto.file.FileName}",
-        //        //$"/uploads/{uniqueFileName}"
-        //        SubjectId = filedto.subid
-        //    };
-
-        //    await _filerepo.AddFun(fileRecord);
-
-        //    return Ok(new { message = "تم تحميل الملف بنجاح.", path = fileRecord.FilePath });
-        //}
     }
 }
