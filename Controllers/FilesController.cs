@@ -48,7 +48,8 @@ namespace Learntendo_backend.Controllers
             var fileRecord = new Files
             {
                 FileName = file.File.FileName,
-                FilePath = $"/uploads/{uniqueFileName}"
+                FilePath = $"/uploads/{uniqueFileName}",
+                CreatedDate = DateTime.Now
             };
 
             await _filerepo.AddFun(fileRecord);
