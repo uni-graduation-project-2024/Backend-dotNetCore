@@ -103,7 +103,7 @@ builder.Services.AddHangfire(config =>
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<DailyResetService>();
 
-builder.WebHost.UseWebRoot("wwwroot");
+
 
 
 var app = builder.Build();
@@ -119,6 +119,11 @@ using (var scope = app.Services.CreateScope())
 }
 //</summary>
 
+if (string.IsNullOrEmpty(app.Environment.WebRootPath))
+{
+    app.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+}//==builder.WebHost.UseWebRoot("wwwroot");
+app.UseStaticFiles();
 
 // استدعاء دالة SeedAdmin لإضافة Admin إذا لم يكن موجودًا
 using (var scope = app.Services.CreateScope())
@@ -145,7 +150,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.UseRouting();
 app.UseAuthentication();
