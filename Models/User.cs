@@ -23,7 +23,7 @@ namespace Learntendo_backend.Models
         public required string Email { get; set; }
 
         public int TotalQuestion { get; set; } = 0;
-
+        public int NumFilesUploadedToday { get; set; } = 0;
         public int NumQuestionSolToday { get; set; } = 0;
 
         public int Coins { get; set; } = 0;
@@ -59,6 +59,9 @@ namespace Learntendo_backend.Models
 
         public bool? IfStreakActive { get; set; }
         public int? GroupId { get; set; }
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public ICollection<Files> Files { get; set; } = new List<Files>();
         [JsonIgnore]
         [IgnoreDataMember]
         public ICollection<Subject> Subjects { get; set; } = new List<Subject>();
