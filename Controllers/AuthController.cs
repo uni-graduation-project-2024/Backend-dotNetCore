@@ -14,6 +14,7 @@ namespace Learntendo_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class AuthController : ControllerBase
     {
         private readonly IAuthRepository _authRepository;
@@ -67,6 +68,8 @@ namespace Learntendo_backend.Controllers
 
             return tokenHandler.WriteToken(token);
         }
+       
+
 
         [HttpPost("registeruser")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto RegisterDto)
