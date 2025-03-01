@@ -7,9 +7,13 @@ using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Learntendo_backend.Controllers
-{
+{ 
     [Route("api/[controller]")]
     [ApiController]
+
+
+   
+
     public class ExamController : Controller
     {
         private readonly IDataRepository<Exam> _examRepo;
