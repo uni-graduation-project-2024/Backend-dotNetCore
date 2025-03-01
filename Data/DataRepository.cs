@@ -19,7 +19,22 @@ namespace Learntendo_backend.Data
            _db = db;
             table =_db.Set<T>();
         }
-
+        public async Task ChecknumofgeneratedFile(int userId)
+        {
+            if (userId != null)
+            {
+                var user = await _db.User.FindAsync(userId);
+                if (user != null && user.NumFilesUploadedToday < 2)
+                {
+                    user.NumFilesUploadedToday += 1;
+                }
+                else if (user.NumFilesUploadedToday == 2)
+                {
+                    throw new KeyNotFoundException("you can't generate ");
+                }
+                await _db.SaveChangesAsync();
+            }
+        }
         public async Task<IEnumerable<T>> GetAllFun()
         {
             return await table.ToListAsync();
@@ -53,22 +68,7 @@ namespace Learntendo_backend.Data
         }
 
 
-        public async Task ChecknumofgeneratedFile(int userId)
-        {
-            if (userId != null)
-            {
-                var user = await _db.User.FindAsync(userId);
-                if (user != null && user.NumFilesUploadedToday < 2)
-                {
-                    user.NumFilesUploadedToday += 1;
-                }
-                else if (user.NumFilesUploadedToday == 2)
-                {
-                    throw new KeyNotFoundException("you can't generate ");
-                }
-                await _db.SaveChangesAsync();
-            }
-        }
+
         public async Task<T> GetByIdFun(int? id)
         {
             var result = await table.FindAsync(id);
