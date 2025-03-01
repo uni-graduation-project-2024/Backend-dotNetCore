@@ -26,6 +26,7 @@ namespace Learntendo_backend.Services
                 user.DateCompleteDailyChallenge = null;
                 user.DailyXp = 0;
                 user.NumQuestionSolToday = 0;
+                user.NumFilesUploadedToday = 0;
             }
 
             _db.SaveChanges();
