@@ -2,6 +2,7 @@
 {
     public class ViewExamDto
     {
+        public int ExamId { get; set; }
         public required string ExamName { get; set; }
         public int NumQuestions { get; set; }
         public string DifficultyLevel { get; set; }
