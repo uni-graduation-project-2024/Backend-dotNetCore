@@ -16,7 +16,7 @@ using System;
 //using Learntendo_backend.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using static DatabaseSeeder;
-using Learntendo_backend.Hubs;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -200,8 +200,7 @@ app.MapControllers();
 app.UseEndpoints(endpoints =>
 {    });
 
-//app.MapHub<LeaderboardHub>("/leaderboardHub");
-app.MapHub<LeaderboardHub>("/leaderboardHub");
+
 app.MapControllers();
 
 app.Run();

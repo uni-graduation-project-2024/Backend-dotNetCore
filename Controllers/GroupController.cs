@@ -1,7 +1,5 @@
 ﻿using Learntendo_backend.Data;
-//using Learntendo_backend.Hubs;
 using Learntendo_backend.Models;
-using Learntendo_backend.Hubs;
 using Learntendo_backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -29,53 +27,31 @@ namespace Learntendo_backend.Controllers
             var userGroup = _db.User.Where(u => u.UserId == userId).Select(u => u.GroupId).FirstOrDefault();
 
             if (userGroup == null)
-        [HttpGet("GetLeaderboard/{groupId}")]
-        public async Task<IActionResult> GetLeaderboard(int groupId)
-        {
+            {
                 return NotFound("User not found or not assigned to a group.");
             }
 
-            
+
             var leaderboard = _db.User
-                .Where(u => u.GroupId == userGroup) 
-            var leaderboard = await _db.User
-                .Where(u => u.GroupId == groupId)
+                .Where(u => u.GroupId == userGroup)
                 .OrderByDescending(u => u.WeeklyXp)
                 .Select(u => new
                 {
-                    u.UserId,
                     u.Username,
                     u.WeeklyXp,
-
                 })
                 .ToList();
-                .ToListAsync();
 
             return Ok(leaderboard);
         }
-        [HttpPost("UpdateScore")]
-        public async Task<IActionResult> UpdateScore(int userId, int points, [FromServices] IHubContext<LeaderboardHub> hubContext)
-        {
-            var user = await _db.User.FirstOrDefaultAsync(u => u.UserId == userId);
-            if (user == null)
-            {
-                return NotFound(new { message = "User not found" });
-            }
 
-            user.WeeklyXp += points;
-            await _db.SaveChangesAsync();
 
-            // إرسال تحديث للـ Leaderboard الخاص بالجروب
-            await hubContext.Clients.Group($"group-{user.GroupId}").SendAsync("ReceiveLeaderboardUpdate");
-
-            return Ok(new { message = "Score updated", user.WeeklyXp });
-        }
-
-        //await _groupService.ResetWeeklyGroups();
-        //return Ok(new { message = "Weekly groups reset successfully!" });
     }
 }
-    
+
+
+
+
 
 
 
