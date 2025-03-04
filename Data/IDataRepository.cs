@@ -19,5 +19,6 @@ namespace Learntendo_backend.Data
         Task AddFun(T entity);
         Task UpdateFun(T entity);
         Task DeleteFun(int id);
+        Task UpdatePostExamRelatedTable(object examId);
     }
 }

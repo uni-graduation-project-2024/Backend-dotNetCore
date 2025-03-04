@@ -9,13 +9,27 @@ using Learntendo_backend.Models;
 using System.Text;
 using Learntendo_backend.Mapping;
 using Learntendo_backend.Services;
-
 using Hangfire;
 
 
 var builder = WebApplication.CreateBuilder(args);
+/////////////////
+builder.Services.AddSignalR();
 
 //AddAutoMapper
+builder.Services.AddControllers();
+builder.Services.AddRazorPages();
+
+// إضافة خدمات CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+});
+
+
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 builder.Services.AddDbContext<DataContext>(options =>
@@ -36,9 +50,14 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
-//builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
 
-
+var secretKey = builder.Configuration["JwtSettings:SecretKey"];
+if (string.IsNullOrWhiteSpace(secretKey))
+{
+    throw new InvalidOperationException("JWT Secret Key is missing or empty in configuration.");
+}
+var key = Encoding.UTF8.GetBytes(secretKey);
+////////////////////////////////////////////////////////
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -65,6 +84,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             RoleClaimType = "role"
             //////
         };
+    
     });
 ////////////
 ///
@@ -82,16 +102,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
-});
-
-
-
 
 builder.Services.AddHangfire(config =>
     config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
@@ -102,14 +112,31 @@ builder.Services.AddHangfire(config =>
 
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<DailyResetService>();
+builder.Services.AddScoped<GroupService>();
 
 
 
 
 var app = builder.Build();
 //<summary>
+
+app.UseHangfireServer();
 app.UseHangfireDashboard();
+
 app.MapHangfireDashboard();
+app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<GroupService>(
+    job => job.AssignUsersToGroups(),
+    Cron.Weekly(DayOfWeek.Saturday, 0, 0));
+
+
+RecurringJob.AddOrUpdate<DataRepository<User>>(
+    "daily-challenge-check",
+    repo => repo.CheckDailyChallengeForAllUsers(),
+    Cron.Daily(0, 0) 
+);
+
 
 //https://localhost:7078/hangfire HangfireDashboard
 using (var scope = app.Services.CreateScope())
@@ -149,11 +176,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+//app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseRouting();
+app.UseWebSockets();
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
+app.UseEndpoints(endpoints =>
+{    });
+
+
 app.MapControllers();
 
 app.Run();

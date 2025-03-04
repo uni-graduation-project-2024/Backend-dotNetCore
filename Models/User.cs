@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
+
 namespace Learntendo_backend.Models
 {
     [Table("User")]
@@ -54,6 +55,9 @@ namespace Learntendo_backend.Models
 
         public DateTime? DateCompleteMonthlyChallenge { get; set; }
 
+        public DateTime? LastExamDate { get; set; }
+
+
         [Required]
         public DateTime JoinedDate { get; set; }
 
@@ -68,5 +72,12 @@ namespace Learntendo_backend.Models
         [JsonIgnore]
         [IgnoreDataMember]
         public ICollection<Exam> Exams { get; set; } = new List<Exam>();
+
+        public Group Group { get; set; }
+
+
+
+
+
     }
 }
