@@ -233,7 +233,7 @@ namespace Learntendo_backend.Data
 
             if (hasExamToday)
             {
-                user.CompleteDailyChallenge = true;
+               // user.CompleteDailyChallenge = true;
                 user.DateCompleteDailyChallenge = today;
 
                 user.DailyXp = await _db.Exam
@@ -243,10 +243,19 @@ namespace Learntendo_backend.Data
                 user.WeeklyXp = await _db.Exam
                    .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                    .SumAsync(e => e.XpCollected);
+                user.MonthlyXp = await _db.Exam
+                   .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
+                   .SumAsync(e => e.XpCollected);
                 ///////////////////////////////////////////////
                 user.NumQuestionSolToday = await _db.Exam
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.NumQuestions);
+
+                if (user.DailyXp >= 50)
+                {
+                    user.Coins += 5;
+                    user.CompleteDailyChallenge = true;
+                }
             }
             else
             {

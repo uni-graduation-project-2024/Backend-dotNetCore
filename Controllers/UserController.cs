@@ -1,4 +1,4 @@
-﻿
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -17,11 +17,12 @@ namespace Learntendo_backend.Controllers
     {
         private readonly DataContext _context;
         private readonly IDataRepository<User> _userRepo;
-
-        public UserController(DataContext context, IDataRepository<User> userRepo)
+        private readonly IMapper _mapper;
+        public UserController(DataContext context, IDataRepository<User> userRepo, IMapper mapper)
         {
             _context = context;
             _userRepo = userRepo;
+            _mapper = mapper;
         }
 
         [HttpPost("change-password")]
@@ -82,6 +83,41 @@ namespace Learntendo_backend.Controllers
             {
                 return NotFound($"No user found with this ID: {userId}");
             }
+        }
+      
+        [HttpPost("buy-freeze-streak/{userId}")]
+        public async Task<IActionResult> BuyFreezeStreak(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+                return NotFound("User not found");
+
+            var userDto = _mapper.Map<UserDto>(user);
+
+            int freezeStreak = userDto?.FreezeStreak ?? 0;
+            int coins = userDto?.Coins ?? 0;
+
+
+            if (freezeStreak < 5)
+            {
+                if (coins >= 100)
+                {
+                    coins -= 100; 
+                    freezeStreak += 1; 
+                    userDto.Coins = coins;
+                    userDto.FreezeStreak = freezeStreak;
+                    _mapper.Map(userDto, user);
+                    await _context.SaveChangesAsync();
+
+                    return Ok("Freeze Streak has been successfully purchased!");
+                }
+                else
+                {
+                    return BadRequest("You don't have enough coins to purchase Freeze Streak");
+                }
+            }
+
+            return BadRequest("You have reached the maximum limit for Freeze Streak");
         }
     }
 }

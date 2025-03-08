@@ -57,6 +57,8 @@ namespace Learntendo_backend.Models
 
         public DateTime? LastExamDate { get; set; }
 
+        public string? LeagueHistory { get; set; }
+
 
         [Required]
         public DateTime JoinedDate { get; set; }

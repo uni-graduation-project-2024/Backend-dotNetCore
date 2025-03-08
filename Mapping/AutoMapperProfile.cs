@@ -19,6 +19,8 @@ namespace Learntendo_backend.Mapping
 
             CreateMap<ViewExamDto, Exam>();
 
+            CreateMap<User, UserDto>().ReverseMap();
+
             CreateMap<ExamDto, Exam>()
             .ForMember(dest => dest.McqQuestionsData, opt => opt.MapFrom(src =>
                 src.McqQuestionsData != null ? JsonConvert.SerializeObject(src.McqQuestionsData) : null))
@@ -30,6 +32,19 @@ namespace Learntendo_backend.Mapping
                     src.McqQuestionsData != null ? JsonConvert.DeserializeObject<List<McqQuestionDto>>(src.McqQuestionsData) : null))
                 .ForMember(dest => dest.TfQuestionsData, opt => opt.MapFrom(src =>
                     src.TfQuestionsData != null ? JsonConvert.DeserializeObject<List<TfQuestionDto>>(src.TfQuestionsData) : null));
+
+            CreateMap<User, UserDto>()
+            .ForMember(dest => dest.LeagueHistory, opt => opt.MapFrom(src =>
+            !string.IsNullOrEmpty(src.LeagueHistory)
+              ? JsonConvert.DeserializeObject<Dictionary<string, string>>(src.LeagueHistory)
+              : new Dictionary<string, string>()));
+
+            CreateMap<UserDto, User>()
+                .ForMember(dest => dest.LeagueHistory, opt => opt.MapFrom(src =>
+                    src.LeagueHistory != null && src.LeagueHistory.Any()
+                        ? JsonConvert.SerializeObject(src.LeagueHistory)
+                        : null));
+
         }
     }
 

@@ -32,7 +32,6 @@ namespace Learntendo_backend.Services
 
         }
 
-
         public void AssignUsersToGroups()
         {
 
@@ -42,17 +41,21 @@ namespace Learntendo_backend.Services
 
                 var startOfWeek = GetStartOfWeek(DateTime.UtcNow);
                 var endOfWeek = startOfWeek.AddDays(6).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+                var topUsers = _db.User
+                                  .OrderByDescending(u => u.WeeklyXp)
+                                  .Take(3)
+                                  .ToList();
 
-                // تصفير GroupId للمستخدمين قبل حذف الجروبات القديمة
+                if (topUsers.Count > 0) topUsers[0].Coins += 100; 
+                if (topUsers.Count > 1) topUsers[1].Coins += 70;  
+                if (topUsers.Count > 2) topUsers[2].Coins += 50;  
+
+                _db.SaveChanges();
                 _db.User.ToList().ForEach(u => u.GroupId = null);
                 _db.SaveChanges();
-
-                // حذف الجروبات القديمة
                 var oldGroups = _db.Group.ToList();
                 _db.Group.RemoveRange(oldGroups);
                 _db.SaveChanges();
-
-                // إنشاء الجروب الخاص بالأسبوع الجديد
                 var newWeek = new Group
                 {
                     GroupName = $"Week {startOfWeek:yyyy-MM-dd}",
@@ -77,7 +80,7 @@ namespace Learntendo_backend.Services
 
                 _db.SaveChanges();
 
-                // إنشاء الجروبات الفرعية داخل هذا الأسبوع الجديد
+                
                 int groupCount = (int)Math.Ceiling(users.Count / 5.0);
                 var newGroups = new List<Group>();
 
@@ -85,7 +88,7 @@ namespace Learntendo_backend.Services
                 {
                     newGroups.Add(new Group
                     {
-                        GroupName = $"Group {i + 1} - {newWeek.GroupName}", // ربط الاسم بالأسبوع
+                        GroupName = $"Group {i + 1} - {newWeek.GroupName}", 
                         StartDate = newWeek.StartDate,
                         EndDate = newWeek.EndDate
                     });
@@ -93,18 +96,16 @@ namespace Learntendo_backend.Services
 
                 _db.Group.AddRange(newGroups);
                 _db.SaveChanges();
-
-                // التأكد من حفظ الجروبات
                 var savedGroups = _db.Group.Where(g => g.StartDate == startOfWeek).ToList();
-                Console.WriteLine($"تم حفظ {savedGroups.Count} جروبًا في قاعدة البيانات.");
+              
 
                 if (savedGroups.Count == 0)
                 {
-                    Console.WriteLine(" لم يتم حفظ الجروبات بشكل صحيح!");
+                    
                     return;
                 }
 
-                // ربط المستخدمين بالجروبات الجديدة
+               
                 for (int i = 0; i < users.Count; i++)
                 {
                     users[i].GroupId = savedGroups[i % savedGroups.Count].GroupId;
@@ -112,7 +113,7 @@ namespace Learntendo_backend.Services
 
                 _db.SaveChanges();
 
-                Console.WriteLine("تم توزيع المستخدمين على الجروبات بنجاح!");
+                
             }
 
         }

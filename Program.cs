@@ -126,6 +126,13 @@ app.UseHangfireDashboard();
 app.MapHangfireDashboard();
 app.UseHangfireDashboard();
 
+RecurringJob.AddOrUpdate<LeagueService>(
+            "reset-monthly-xp",
+            x => x.ProcessMonthlyLeague(),
+            Cron.Monthly);
+
+
+
 RecurringJob.AddOrUpdate<GroupService>(
     job => job.AssignUsersToGroups(),
     Cron.Weekly(DayOfWeek.Saturday, 0, 0));
@@ -244,4 +251,6 @@ public static class DatabaseSeeder
     }
 
    
+
+
 }
