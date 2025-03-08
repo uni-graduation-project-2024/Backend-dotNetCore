@@ -5,6 +5,8 @@ using AutoMapper;
 using Learntendo_backend.Dtos;
 using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.SignalR;
+using System.Reflection.PortableExecutable;
+using iText.Kernel.Pdf;
 
 namespace Learntendo_backend.Controllers
 {
@@ -34,6 +36,28 @@ namespace Learntendo_backend.Controllers
             if (file == null || file.File.Length == 0)
             {
                 return BadRequest("Please Upload The File");
+            }
+
+            const long maxFileSize = 5 * 1024 * 1024; // 5MB
+
+            if (file.File.Length > maxFileSize)
+            {
+                return BadRequest($"File size exceeds the allowed limit of 5MB.");
+            }
+            int maxPages = 50;
+            using (var stream = file.File.OpenReadStream())
+            {
+                using (var pdfReader = new PdfReader(stream))
+                {
+                    using (var pdfDocument = new PdfDocument(pdfReader))
+                    {
+                        int totalPages = pdfDocument.GetNumberOfPages();
+                        if (totalPages > maxPages)
+                        {
+                            return BadRequest($"The file contains {totalPages} pages, exceeding the limit of {maxPages} pages.");
+                        }
+                    }
+                }
             }
             var filefolder = Path.Combine(_env.WebRootPath, "uploads");
 

@@ -5,6 +5,7 @@ using Learntendo_backend.Dtos;
 using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
 using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Learntendo_backend.Controllers
 { 
@@ -20,18 +21,31 @@ namespace Learntendo_backend.Controllers
         private readonly IDataRepository<Subject> _subjectRepo;
         private readonly IDataRepository<User> _userRepo;
         private readonly IMapper _map;
-        public ExamController(IDataRepository<Subject> subjectRepo, IDataRepository<Exam> examRepo, IDataRepository<User> userRepo, IMapper map)
+        private readonly DataContext _db;
+
+        public ExamController(IDataRepository<Subject> subjectRepo, IDataRepository<Exam> examRepo, IDataRepository<User> userRepo, IMapper map , DataContext db)
         {
             _userRepo = userRepo;
             _examRepo = examRepo;
             _subjectRepo = subjectRepo;
             _map = map;
+            _db = db;
         }
 
 
         [HttpPost]
         public async Task<IActionResult> CreateExam([FromBody] ExamDto examDto)
         {
+            var today = DateTime.Today;
+
+            int examsToday = await _db.Exam
+                .Where(e => e.UserId == examDto.UserId && e.CreatedDate >= today)
+                .CountAsync();
+
+            if (examsToday >= 5)
+            {
+                return BadRequest(new { message = "You have reached your daily exam limit (5 exams). Please try again tomorrow." });
+            }
             var exam = _map.Map<Exam>(examDto);
             exam.TfQuestionsData = null;
 
