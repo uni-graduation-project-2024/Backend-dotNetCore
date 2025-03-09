@@ -6,6 +6,7 @@ using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
 using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace Learntendo_backend.Controllers
 { 
@@ -32,6 +33,25 @@ namespace Learntendo_backend.Controllers
             _db = db;
         }
 
+        [HttpPut("RequestGenerateExam/{userId}")]
+        public async Task<IActionResult> GenerateExam(int userId)
+        {
+            var user = await _userRepo.GetByIdFun(userId);
+            if (user == null)
+            {
+                return NotFound($"User with {userId} not found");
+            }
+            else if (user.GenerationPower > 0) //change NumFilesUploadedToday -> GenerationPower
+            {
+                user.GenerationPower -= 1;
+            }
+            else if (user.GenerationPower <= 0)
+            {
+                return NotFound("Sorry, You are out of generation power.");
+            }
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateExam([FromBody] ExamDto examDto)
@@ -141,23 +161,42 @@ namespace Learntendo_backend.Controllers
                 await _subjectRepo.UpdateFun(oldSubject);
             }
 
-            var newSubject = await _subjectRepo.GetByIdFun(subId);
-            if (newSubject == null)
+            if (subId == -1) // Adding case: Moving subject to No folder
             {
-                return NotFound($"New Subject with ID {subId} not found.");
+                exam.SubjectId = null;
+                await _examRepo.UpdateFun(exam);
+                return Ok("Exam moved to noFolder successfully.");
             }
+            else
+            {
+                var newSubject = await _subjectRepo.GetByIdFun(subId);
+                if (newSubject == null)
+                {
+                    return NotFound($"New Subject with ID {subId} not found.");
+                }
 
-            newSubject.NumExams += 1;
-            newSubject.TotalQuestions += exam.NumQuestions;
-            await _subjectRepo.UpdateFun(newSubject);
+                newSubject.NumExams += 1;
+                newSubject.TotalQuestions += exam.NumQuestions;
+                await _subjectRepo.UpdateFun(newSubject);
 
-            exam.SubjectId = subId;
-            await _examRepo.UpdateFun(exam);
+                exam.SubjectId = subId;
+                await _examRepo.UpdateFun(exam);
 
-            return Ok("Exam moved successfully.");
+                return Ok("Exam moved successfully.");
+            }
         }
 
+        [HttpPut]
+        public async Task<IActionResult> RetryExam([FromBody] ExamDto examDto)
+        {
+            var exam = _map.Map<Exam>(examDto);
+            exam.TfQuestionsData = null;
+            exam.CreatedDate = DateTime.Now; // UpdatedDate
+            await _examRepo.UpdateFun(exam);
+            await _examRepo.UpdatePostExamRelatedTable(exam.ExamId);
+            return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
 
+        }
 
 
     }

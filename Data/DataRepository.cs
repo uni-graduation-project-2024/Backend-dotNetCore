@@ -21,22 +21,7 @@ namespace Learntendo_backend.Data
            _db = db;
             table =_db.Set<T>();
         }
-        public async Task ChecknumofgeneratedFile(int userId)
-        {
-            if (userId != null)
-            {
-                var user = await _db.User.FindAsync(userId);
-                if (user != null && user.NumFilesUploadedToday < 2)
-                {
-                    user.NumFilesUploadedToday += 1;
-                }
-                else if (user.NumFilesUploadedToday == 2)
-                {
-                    throw new KeyNotFoundException("you can't generate ");
-                }
-                await _db.SaveChangesAsync();
-            }
-        }
+
         public async Task<IEnumerable<T>> GetAllFun()
         {
             return await table.ToListAsync();
@@ -108,21 +93,24 @@ namespace Learntendo_backend.Data
         {
             var exam = await _db.Exam.FindAsync(examId);
             if (exam == null) return;
-            if (exam.SubjectId != null)
-            {
-                var subject = await _db.Subject.FindAsync(exam.SubjectId);
-                if (subject != null)
-                {
-                    subject.NumExams += 1;
-                    subject.TotalQuestions += exam.NumQuestions;
-                    _db.Subject.Update(subject);
-                }
-               
-            }
-            else
-            {
-                exam.SubjectId = null;
-            }
+            /// The subjectId of any newly created Exam is null
+            /// Incorrect logic, Retrying any exam again shouldn't update any subject releated fields
+
+            //if (exam.SubjectId != null)
+            //{
+            //    var subject = await _db.Subject.FindAsync(exam.SubjectId);
+            //    if (subject != null)
+            //    {
+            //        subject.NumExams += 1;
+            //        subject.TotalQuestions += exam.NumQuestions;
+            //        _db.Subject.Update(subject);
+            //    }
+
+            //}
+            //else
+            //{
+            //    exam.SubjectId = null;
+            //}
             var user = await _db.User.FindAsync(exam.UserId);
             if (user != null)
             {

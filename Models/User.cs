@@ -24,7 +24,7 @@ namespace Learntendo_backend.Models
         public required string Email { get; set; }
 
         public int TotalQuestion { get; set; } = 0;
-        public int NumFilesUploadedToday { get; set; } = 0;
+        public int GenerationPower { get; set; } = 5; //change NumFilesUploadedToday -> GenerationPower
         public int NumQuestionSolToday { get; set; } = 0;
 
         public int Coins { get; set; } = 0;

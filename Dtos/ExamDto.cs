@@ -5,6 +5,8 @@
         public class ExamDto
         {
             public string? QuestionType { get; set; }
+
+            public int? ExamId { get; set; } // Add ExamId: Requried for retrying exam feature
             
             public string? ExamName { get; set; }
             public int? NumQuestions { get; set; }

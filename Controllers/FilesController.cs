@@ -84,14 +84,12 @@ namespace Learntendo_backend.Controllers
                 CreatedDate = DateTime.Now,
                 UserId = file.UserId
             };
-
-            await _userrepo.ChecknumofgeneratedFile(file.UserId);
              
 
             await _filerepo.AddFun(fileRecord);
 
-            return Ok(new { message = "File Uploaded Successfully.", path = fileRecord.FilePath });
-         
+            return Ok(new { message = "File Uploaded Successfully.", fileId = fileRecord.FileId }); // change path -> fileId
+
         }
 
         //download function
