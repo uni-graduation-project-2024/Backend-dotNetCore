@@ -116,20 +116,30 @@ namespace Learntendo_backend.Controllers
             return File(fileBytes, "application/pdf", fileName);
         }
 
-
         [HttpGet("UserUploadFiles/{userId}")]
         public async Task<IActionResult> UserUploadFiles(int userId)
         {
-            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
-            if (user == null)
+            var userExists = await _context.User.AnyAsync(u => u.UserId == userId);
+            if (!userExists)
             {
                 return NotFound("User not found.");
             }
-            var filesdto = _mapper.Map<FilesDto>(user);
-            return Ok(new
+
+            var files = await _context.Files
+                .Where(f => f.UserId == userId)
+                .Select(f => new
+                {
+                    f.FileId,
+                    f.FileName
+                })
+                .ToListAsync();
+
+            if (files == null || !files.Any())
             {
-                filesdto.UploadedFiles
-            });
+                return NotFound("No files found for this user.");
+            }
+
+            return Ok(files);
         }
 
 
