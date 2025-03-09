@@ -7,6 +7,8 @@ using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.SignalR;
 using System.Reflection.PortableExecutable;
 using iText.Kernel.Pdf;
+using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace Learntendo_backend.Controllers
 {
@@ -19,13 +21,14 @@ namespace Learntendo_backend.Controllers
         private readonly IDataRepository<User> _userrepo;
         private readonly IWebHostEnvironment _env;
         private readonly IMapper _mapper;
-
-        public FilesController(IDataRepository<Files> filerepo, IDataRepository<User> userrepo, IMapper mapper , IWebHostEnvironment env)
+        private readonly DataContext _context;
+        public FilesController(IDataRepository<Files> filerepo, IDataRepository<User> userrepo, IMapper mapper , IWebHostEnvironment env , DataContext context)
         {
             _env = env;
             _filerepo = filerepo;
             _mapper = mapper;
             _userrepo = userrepo;
+            _context = context;
         }
        
 
@@ -111,6 +114,22 @@ namespace Learntendo_backend.Controllers
 
             var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
             return File(fileBytes, "application/pdf", fileName);
+        }
+
+
+        [HttpGet("UserUploadFiles/{userId}")]
+        public async Task<IActionResult> UserUploadFiles(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var filesdto = _mapper.Map<FilesDto>(user);
+            return Ok(new
+            {
+                filesdto.UploadedFiles
+            });
         }
 
 

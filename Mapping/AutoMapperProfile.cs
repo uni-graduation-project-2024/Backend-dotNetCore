@@ -21,6 +21,13 @@ namespace Learntendo_backend.Mapping
 
             CreateMap<User, UserDto>().ReverseMap();
 
+            CreateMap<User, FilesDto>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+            .ForMember(dest => dest.UploadedFiles,
+                       opt => opt.MapFrom(src => src.Files != null
+                                                ? src.Files.Select(f => f.FilePath).ToList()
+                                                : new List<string>()));
+
             CreateMap<ExamDto, Exam>()
             .ForMember(dest => dest.McqQuestionsData, opt => opt.MapFrom(src =>
                 src.McqQuestionsData != null ? JsonConvert.SerializeObject(src.McqQuestionsData) : null))

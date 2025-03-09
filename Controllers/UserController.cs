@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using Learntendo_backend.Data;
 using Learntendo_backend.Models;
 using Learntendo_backend.Dtos;
+using Learntendo_backend.Services;
+using System.Collections.Generic;
+using iText.Layout.Element;
 
 namespace Learntendo_backend.Controllers
 {
@@ -84,7 +87,7 @@ namespace Learntendo_backend.Controllers
                 return NotFound($"No user found with this ID: {userId}");
             }
         }
-      
+
         [HttpPost("buy-freeze-streak/{userId}")]
         public async Task<IActionResult> BuyFreezeStreak(int userId)
         {
@@ -102,8 +105,8 @@ namespace Learntendo_backend.Controllers
             {
                 if (coins >= 100)
                 {
-                    coins -= 100; 
-                    freezeStreak += 1; 
+                    coins -= 100;
+                    freezeStreak += 1;
                     userDto.Coins = coins;
                     userDto.FreezeStreak = freezeStreak;
                     _mapper.Map(userDto, user);
@@ -119,5 +122,44 @@ namespace Learntendo_backend.Controllers
 
             return BadRequest("You have reached the maximum limit for Freeze Streak");
         }
+
+        [HttpGet("get-challenge-status/{userId}")]
+        public async Task<IActionResult> GetChallengeStatus(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var userDto = _mapper.Map<UserDto>(user); 
+            int dailytarget = 50;
+            List<int> monthlytarget = [1000, 2000, 3000];
+           
+            return Ok(new
+            {
+                userDto.DailyXp,
+                userDto.MonthlyXp,
+                Targetdaily = dailytarget,
+                monthtarget = monthlytarget
+            });
+        }
+
+        [HttpGet("MonthlyBudge/{userId}")]
+        public async Task<IActionResult> MonthlyBudge(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            var userDto = _mapper.Map<UserDto>(user);
+            return Ok(new
+            {
+                userDto.LeagueHistory
+            });
+        }
+
+
     }
 }
