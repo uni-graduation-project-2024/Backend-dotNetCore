@@ -18,11 +18,12 @@ namespace Learntendo_backend.Controllers
     {
         private readonly IDataRepository<Subject> _subjectRepo;
         private readonly IMapper _map;
-
-        public SubjectController(IDataRepository<Subject> subjectRepo, IMapper map)
+        private readonly IDataRepository<Exam> _examRepo;
+        public SubjectController(IDataRepository<Subject> subjectRepo, IMapper map , IDataRepository<Exam> examRepo)
         {
             _subjectRepo = subjectRepo;
             _map = map;
+            _examRepo = examRepo;
         }
 
     
@@ -79,19 +80,30 @@ namespace Learntendo_backend.Controllers
             return Ok(subjectDto);
         }
 
-      
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSubject(int id)
         {
             var subject = await _subjectRepo.GetByIdFun(id);
             if (subject == null)
             {
-                return NotFound($"subject with this id {id} not found");
+                return NotFound($"Subject with ID {id} not found.");
+            }
+
+            var exams = await _examRepo.GetAllExambysubFun(id);
+
+            if (exams.Any())
+            {
+                foreach (var exam in exams)
+                {
+                    await _examRepo.DeleteFun(exam.ExamId);
+                }
             }
 
             await _subjectRepo.DeleteFun(id);
+
             return Ok("Deleted Successfully");
         }
+
     }
 
 }
