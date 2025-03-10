@@ -42,16 +42,19 @@ namespace Learntendo_backend.Services
                     if (userDto.MonthlyXp >= 3000)
                     {
                         userDto.CurrentLeague = "Gold";
+                        userDto.Coins += 100;
                         userDto.CompleteMonthlyChallenge = true;
                     }
                     else if (userDto.MonthlyXp >= 2000)
                     {
                         userDto.CurrentLeague = "Silver";
+                        userDto.Coins += 200;
                         userDto.CompleteMonthlyChallenge = true;
                     }
                     else if (userDto.MonthlyXp >= 1000)
                     {
                         userDto.CurrentLeague = "Bronze";
+                        userDto.Coins += 300;
                         userDto.CompleteMonthlyChallenge = true;
                     }
                     else
