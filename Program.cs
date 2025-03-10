@@ -166,8 +166,6 @@ using (var scope = app.Services.CreateScope())
     DatabaseSeeder.SeedAdmin(context);
 }
 
-
-
 app.UseCors("AllowAll"); // Apply CORS policy
 
 // Configure the HTTP request pipeline.

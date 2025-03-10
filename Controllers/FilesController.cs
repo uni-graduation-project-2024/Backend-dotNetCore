@@ -30,8 +30,8 @@ namespace Learntendo_backend.Controllers
             _userrepo = userrepo;
             _context = context;
         }
-       
 
+        
         //upload function
         [HttpPost("Upload")]
         public async Task<IActionResult> UploadFile([FromForm] FilesDto file)
@@ -48,19 +48,50 @@ namespace Learntendo_backend.Controllers
                 return BadRequest($"File size exceeds the allowed limit of 5MB.");
             }
             int maxPages = 50;
+            bool isValidFile = false;
+            var fileExtension = Path.GetExtension(file.File.FileName).ToLower();
             using (var stream = file.File.OpenReadStream())
             {
-                using (var pdfReader = new PdfReader(stream))
+                if (fileExtension == ".pdf")
                 {
-                    using (var pdfDocument = new PdfDocument(pdfReader))
+                    using (var pdfReader = new PdfReader(stream))
                     {
-                        int totalPages = pdfDocument.GetNumberOfPages();
-                        if (totalPages > maxPages)
+                        using (var pdfDocument = new PdfDocument(pdfReader))
                         {
-                            return BadRequest($"The file contains {totalPages} pages, exceeding the limit of {maxPages} pages.");
+                            int totalPages = pdfDocument.GetNumberOfPages();
+                            if (totalPages > maxPages)
+                            {
+                                return BadRequest($"The PDF file contains {totalPages} pages, exceeding the limit of {maxPages} pages.");
+                            }
                         }
                     }
+                    isValidFile = true;
                 }
+                else if (fileExtension == ".doc" || fileExtension == ".docx")
+                {
+                    var doc = new Aspose.Words.Document(stream);
+                    int totalPages = doc.PageCount;
+                    if (totalPages > maxPages)
+                    {
+                        return BadRequest($"The Word document contains {totalPages} pages, exceeding the limit of {maxPages} pages.");
+                    }
+                    isValidFile = true;
+                }
+                else if (fileExtension == ".ppt" || fileExtension == ".pptx")
+                {
+                    var presentation = new Aspose.Slides.Presentation(stream);
+                    int totalPages = presentation.Slides.Count;
+                    if (totalPages > maxPages)
+                    {
+                        return BadRequest($"The PowerPoint file contains {totalPages} slides, exceeding the limit of {maxPages} slides.");
+                    }
+                    isValidFile = true;
+                }
+            }
+
+            if (!isValidFile)
+            {
+                return BadRequest("Unsupported file type. Only PDF, Word (DOC/DOCX), and PowerPoint (PPT/PPTX) are allowed.");
             }
             var filefolder = Path.Combine(_env.WebRootPath, "uploads");
 
@@ -97,11 +128,13 @@ namespace Learntendo_backend.Controllers
         public async Task<IActionResult> Download(int FileId)
         {
             var fileRecord = await _filerepo.GetByIdFun(FileId);
-            if (fileRecord?.FilePath == null)
+
+            if (fileRecord == null || string.IsNullOrEmpty(fileRecord.FilePath))
             {
                 return NotFound("File not found.");
             }
 
+            var fileExtension = Path.GetExtension(fileRecord.FilePath).ToLower();
             var fileName = Path.GetFileName(fileRecord.FilePath); 
             var filePath = Path.Combine(_env.WebRootPath, "uploads", fileName);
 
@@ -112,6 +145,9 @@ namespace Learntendo_backend.Controllers
 
             var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
             return File(fileBytes, "application/pdf", fileName);
+            //var mimeType = GetMimeType(fileExtension);
+            //return File(fileBytes, mimeType, fileName);
+
         }
 
         [HttpGet("UserUploadFiles/{userId}")]
@@ -140,6 +176,18 @@ namespace Learntendo_backend.Controllers
             return Ok(files);
         }
 
+        //public string GetMimeType(string extension)
+        //{
+        //    return extension switch
+        //    {
+        //        ".pdf" => "application/pdf",
+        //        ".doc" => "application/msword",
+        //        ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        //        ".ppt" => "application/vnd.ms-powerpoint",
+        //        ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        //        _ => "application/octet-stream"
+        //    };
+        //}
 
 
     }
