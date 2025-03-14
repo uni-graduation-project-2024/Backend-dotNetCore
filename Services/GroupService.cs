@@ -31,7 +31,14 @@ namespace Learntendo_backend.Services
             throw new NotImplementedException();
 
         }
-
+        public enum UserLevel
+        {
+            Newbie =0,
+            Beginner =1,
+            Professional =2,
+            Expert =3,
+            Master =4
+        }
         public void AssignUsersToGroups()
         {
 
@@ -41,17 +48,25 @@ namespace Learntendo_backend.Services
 
                 var startOfWeek = GetStartOfWeek(DateTime.UtcNow);
                 var endOfWeek = startOfWeek.AddDays(6).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-                var topUsers = _db.User
-                                  .OrderByDescending(u => u.WeeklyXp)
-                                  .Take(3)
-                                  .ToList();
+                var groupedUsers = _db.User
+               .Where(u => u.GroupId != null) 
+               .GroupBy(u => u.GroupId) 
+               .ToList();
 
-                if (topUsers.Count > 0) topUsers[0].Coins += 100; 
-                if (topUsers.Count > 1) topUsers[1].Coins += 70;  
-                if (topUsers.Count > 2) topUsers[2].Coins += 50;  
+                foreach (var group in groupedUsers)
+                {
+                    var topUsers = group.OrderByDescending(u => u.WeeklyXp).ToList(); 
 
-                _db.SaveChanges();
-                _db.User.ToList().ForEach(u => u.GroupId = null);
+                    if (topUsers.Any())
+                    {
+                        topUsers[0].Coins += 100;
+                        UpgradeLevel(topUsers[0]); 
+                    }
+                    if (topUsers.Count > 1) topUsers[1].Coins += 70;
+                    if (topUsers.Count > 2) topUsers[2].Coins += 50;
+                    if (topUsers.Any()) DowngradeLevel(topUsers.Last()); 
+                }
+               
                 _db.SaveChanges();
                 var oldGroups = _db.Group.ToList();
                 _db.Group.RemoveRange(oldGroups);
@@ -105,10 +120,16 @@ namespace Learntendo_backend.Services
                     return;
                 }
 
-               
+                int groupIndex = 0;
                 for (int i = 0; i < users.Count; i++)
                 {
-                    users[i].GroupId = savedGroups[i % savedGroups.Count].GroupId;
+                    users[i].GroupId = savedGroups[groupIndex].GroupId;
+
+                   
+                    if ((i + 1) % 5 == 0 && groupIndex < savedGroups.Count - 1)
+                    {
+                        groupIndex++;
+                    }
                 }
 
                 _db.SaveChanges();
@@ -116,6 +137,21 @@ namespace Learntendo_backend.Services
                 
             }
 
+        }
+        private void UpgradeLevel(User user)
+        {
+            if (user.Level < UserLevel.Master)
+            {
+                user.Level++;
+            }
+        }
+
+        private void DowngradeLevel(User user)
+        {
+            if (user.Level > UserLevel.Newbie)
+            {
+                user.Level--;
+            }
         }
 
 

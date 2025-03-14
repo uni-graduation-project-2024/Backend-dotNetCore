@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
+using static Learntendo_backend.Services.GroupService;
 
 
 namespace Learntendo_backend.Models
@@ -77,7 +78,8 @@ namespace Learntendo_backend.Models
 
         public Group Group { get; set; }
 
-
+        [Column(TypeName = "int")] // يتم تخزين `enum` كرقم
+        public UserLevel Level { get; set; } = UserLevel.Newbie;
 
 
 
