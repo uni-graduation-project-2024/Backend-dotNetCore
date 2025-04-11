@@ -71,6 +71,23 @@ namespace Learntendo_backend.Controllers
             }
         }
 
+
+        [HttpGet("user-navbar-info")]
+        public async Task<IActionResult> userNavbarInfo(int userId)
+        {
+            try
+            {
+                var user = await _userRepo.GetByIdFun(userId);
+                var userInfo = _mapper.Map<UserNavbarInfoDto>(user);
+
+                return Ok(userInfo);
+            }
+            catch
+            {
+                return NotFound($"No user found with this ID: {userId}");
+            }
+        }
+        
         [HttpGet("user-profile")]
         // [Authorize(Roles = "Admin")]  // Ensure only admins can view users
         public async Task<IActionResult> userProfile(int userId)
@@ -79,10 +96,11 @@ namespace Learntendo_backend.Controllers
             try
             {
                 var user = await _userRepo.GetByIdFun(userId);
+                var userDto = _mapper.Map<UserDto>(user);
 
-                return Ok(user);
+                return Ok(userDto);
             }
-            catch (Exception ex)
+            catch
             {
                 return NotFound($"No user found with this ID: {userId}");
             }
