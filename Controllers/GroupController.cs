@@ -37,6 +37,7 @@ namespace Learntendo_backend.Controllers
                 .OrderByDescending(u => u.WeeklyXp)
                 .Select(u => new
                 {
+                    u.UserId,
                     u.Username,
                     u.WeeklyXp,
                 })
