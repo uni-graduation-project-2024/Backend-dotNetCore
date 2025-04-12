@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Learntendo_backend.Services
 {
    
-    public class LeagueService
+    public class LeagueService : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IMapper _mapper; 
@@ -22,19 +22,19 @@ namespace Learntendo_backend.Services
             _scopeFactory = scopeFactory;
             _mapper = mapper;
         }
-     
-       
+
+
         public void ProcessMonthlyLeague()
         {
             using (var scope = _scopeFactory.CreateScope())
             {
                 var _db = scope.ServiceProvider.GetRequiredService<DataContext>();
                 var users = _db.User.ToList();
-                string currentMonth = DateTime.Now.ToString("MMMM-yyyy", CultureInfo.InvariantCulture); 
+                string currentMonth = DateTime.Now.ToString("MMMM-yyyy", CultureInfo.InvariantCulture);
                 //string currentMonth = "April-2025";
                 foreach (var user in users)
                 {
-                    
+
                     var userDto = _mapper.Map<UserDto>(user);
                     var leagueHistory = userDto.LeagueHistory ?? new Dictionary<string, string>();
 
@@ -63,14 +63,14 @@ namespace Learntendo_backend.Services
                         userDto.CompleteMonthlyChallenge = false;
                     }
 
-                  
+
                     if (userDto.CompleteMonthlyChallenge && !string.IsNullOrEmpty(userDto.CurrentLeague))
                     {
                         leagueHistory[currentMonth] = userDto.CurrentLeague;
                     }
-                    
+
                     userDto.MonthlyXp = 0;
-                     
+
                     _mapper.Map(userDto, user);
                 }
 
@@ -78,7 +78,10 @@ namespace Learntendo_backend.Services
             }
         }
 
-
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

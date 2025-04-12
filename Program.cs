@@ -141,7 +141,7 @@ RecurringJob.AddOrUpdate<GroupService>(
 RecurringJob.AddOrUpdate<DataRepository<User>>(
     "daily-challenge-check",
     repo => repo.CheckDailyChallengeForAllUsers(),
-    Cron.Daily(0, 0) 
+    Cron.Daily(0, 0)
 );
 
 

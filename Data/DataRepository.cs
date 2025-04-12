@@ -120,6 +120,7 @@ namespace Learntendo_backend.Data
                     user.TotalXp += exam.XpCollected;
                     /////////////////////////////////////////
                     user.WeeklyXp += exam.XpCollected;
+                    user.MonthlyXp += exam.XpCollected;
                 }
 
                 await CheckDailyChallenge(user.UserId);
@@ -161,7 +162,7 @@ namespace Learntendo_backend.Data
                         {
                             user.TotalXp -= exam.XpCollected;
                             /////////////////////////////////////////
-                            user.WeeklyXp += exam.XpCollected;
+                           // user.WeeklyXp += exam.XpCollected;
                         }
 
                         if (exam.CreatedDate.Date == DateTime.UtcNow.Date)
@@ -227,14 +228,7 @@ namespace Learntendo_backend.Data
                 user.DailyXp = await _db.Exam
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.XpCollected);
-                /////////////////////////////////////////
-                user.WeeklyXp = await _db.Exam
-                   .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
-                   .SumAsync(e => e.XpCollected);
-                user.MonthlyXp = await _db.Exam
-                   .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
-                   .SumAsync(e => e.XpCollected);
-                ///////////////////////////////////////////////
+               
                 user.NumQuestionSolToday = await _db.Exam
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.NumQuestions);
