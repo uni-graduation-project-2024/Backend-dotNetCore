@@ -223,7 +223,7 @@ namespace Learntendo_backend.Data
             if (hasExamToday)
             {
                // user.CompleteDailyChallenge = true;
-                user.DateCompleteDailyChallenge = today;
+               // user.DateCompleteDailyChallenge = today;
 
                 user.DailyXp = await _db.Exam
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
@@ -233,10 +233,11 @@ namespace Learntendo_backend.Data
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.NumQuestions);
 
-                if (!user.CompleteDailyChallenge && user.DailyXp >= 50) // if user did not complete daily challenge && user dailyXp > 50
+                if (!user.CompleteDailyChallenge && user.DailyXp >= 20) // if user did not complete daily challenge && user dailyXp > 50
                 {
                     user.Coins += 5;
                     user.CompleteDailyChallenge = true;
+                    user.DateCompleteDailyChallenge = today;
                 }
             }
             else
@@ -271,17 +272,17 @@ namespace Learntendo_backend.Data
         {
             throw new NotImplementedException();
         }
-        public async Task CheckDailyChallengeForAllUsers()
-        {
-            var users = await _db.User.Select(u => u.UserId).ToListAsync();
+        //public async Task CheckDailyChallengeForAllUsers()
+        //{
+        //    var users = await _db.User.Select(u => u.UserId).ToListAsync();
 
-            foreach (var userId in users)
-            {
-                await CheckDailyChallenge(userId);
-            }
+        //    foreach (var userId in users)
+        //    {
+        //        await CheckDailyChallenge(userId);
+        //    }
 
-            await _db.SaveChangesAsync(); // حفظ التغييرات بعد تعديل جميع المستخدمين
-        }
+        //    await _db.SaveChangesAsync(); // حفظ التغييرات بعد تعديل جميع المستخدمين
+        //}
 
 
     }

@@ -138,11 +138,11 @@ RecurringJob.AddOrUpdate<GroupService>(
     Cron.Weekly(DayOfWeek.Saturday, 0, 0));
 
 
-RecurringJob.AddOrUpdate<DataRepository<User>>(
-    "daily-challenge-check",
-    repo => repo.CheckDailyChallengeForAllUsers(),
-    Cron.Daily(0, 0)
-);
+//RecurringJob.AddOrUpdate<DataRepository<User>>(
+//    "daily-challenge-check",
+//    repo => repo.CheckDailyChallengeForAllUsers(),
+//    Cron.Daily(0, 0)
+//);
 
 
 //https://localhost:7078/hangfire HangfireDashboard
