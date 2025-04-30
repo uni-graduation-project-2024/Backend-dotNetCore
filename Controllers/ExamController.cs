@@ -29,8 +29,8 @@ namespace Learntendo_backend.Controllers
             _db = db;
         }
 
-        [HttpPut("RequestGenerateExam/{userId}")]
-        public async Task<IActionResult> GenerateExam(int userId)
+        [HttpPut("UseOneGenerationPower/{userId}")]
+        public async Task<IActionResult> UseOneGenerationPower(int userId)
         {
             var user = await _userRepo.GetByIdFun(userId);
             if (user == null)
@@ -49,6 +49,24 @@ namespace Learntendo_backend.Controllers
             return Ok();
         }
 
+        [HttpGet("RequestGenerateExam/{userId}")]
+        public async Task<IActionResult> RequestGenerateExam(int userId)
+        {
+            var user = await _userRepo.GetByIdFun(userId);
+            if (user == null)
+            {
+                return NotFound($"User with {userId} not found");
+            }
+            else if (user.GenerationPower <= 0) //change NumFilesUploadedToday -> GenerationPower
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok();
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateExam([FromBody] ExamDto examDto)
         {
@@ -58,10 +76,10 @@ namespace Learntendo_backend.Controllers
                 .Where(e => e.UserId == examDto.UserId && e.CreatedDate >= today)
                 .CountAsync();
 
-            if (examsToday >= 5)
-            {
-                return BadRequest(new { message = "You have reached your daily exam limit (5 exams). Please try again tomorrow." });
-            }
+            //if (examsToday >= 5)
+            //{
+            //    return BadRequest(new { message = "You have reached your daily exam limit (5 exams). Please try again tomorrow." });
+            //}
             var exam = _map.Map<Exam>(examDto);
             exam.TfQuestionsData = null;
 
