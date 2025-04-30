@@ -19,10 +19,6 @@ namespace Learntendo_backend.Mapping
 
             CreateMap<ViewExamDto, Exam>();
 
-            CreateMap<User, UserNavbarInfoDto>();
-
-            CreateMap<UserNavbarInfoDto, User>();
-
             CreateMap<User, UserDto>().ReverseMap();
 
             CreateMap<ExamDto, Exam>()

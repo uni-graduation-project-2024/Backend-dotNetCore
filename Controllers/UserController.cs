@@ -78,9 +78,15 @@ namespace Learntendo_backend.Controllers
             try
             {
                 var user = await _userRepo.GetByIdFun(userId);
-                var userInfo = _mapper.Map<UserNavbarInfoDto>(user);
+                var userNavbarInfo = new
+                {
+                    user.StreakScore,
+                    user.Coins,
+                    user.GenerationPower,
 
-                return Ok(userInfo);
+                };
+
+                return Ok(userNavbarInfo);
             }
             catch
             {
