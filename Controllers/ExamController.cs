@@ -76,21 +76,8 @@ namespace Learntendo_backend.Controllers
                 .Where(e => e.UserId == examDto.UserId && e.CreatedDate >= today)
                 .CountAsync();
 
-            //if (examsToday >= 5)
-            //{
-            //    return BadRequest(new { message = "You have reached your daily exam limit (5 exams). Please try again tomorrow." });
-            //}
             var exam = _map.Map<Exam>(examDto);
             exam.TfQuestionsData = null;
-
-            //if (examDto.QuestionType == "MCQ")
-            //{
-            //    exam.TfQuestionsData = null;
-            //}
-            //if (examDto.QuestionType == "TF")
-            //{
-            //    exam.McqQuestionsData = null;
-            //}
             exam.CreatedDate = DateTime.Now;    
             await _examRepo.AddFun(exam);
             await _examRepo.UpdatePostExamRelatedTable(exam.ExamId);
@@ -108,15 +95,7 @@ namespace Learntendo_backend.Controllers
             var examDto = _map.Map<ExamDto>(exam);
             return Ok(examDto);
         }
-        //[HttpGet("all/{subId}")]
-        //public async Task<IActionResult> GetAllExamBySubId(int subId)
-        //{
-        //    var exams = await _examRepo.GetAllExambysubFun(subId);
-  
-        //    var examDto = _map.Map<IEnumerable<ExamDto>>(exams);
-        //    return Ok(examDto);
-        //}
-        //NEW
+
         [HttpGet("all/{userId}")]
         public async Task<IActionResult> GetAllExamByUserId(int userId,[FromQuery] int? subId=null)
         {
