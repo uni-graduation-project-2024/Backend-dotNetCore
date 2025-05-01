@@ -4,7 +4,7 @@
     {
         public int GroupId { get; set; }
         public string GroupName { get; set; }
-        public DateTime StartDate { get; set; } // 🔥 بداية الأسبوع
+        public DateTime StartDate { get; set; } 
         public DateTime EndDate { get; set; }
         public ICollection<User> Users { get; set; }
     }
