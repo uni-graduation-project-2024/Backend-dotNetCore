@@ -2,7 +2,6 @@
 using Learntendo_backend.Data;
 using Learntendo_backend.Dtos;
 using Learntendo_backend.Controllers;
-using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
