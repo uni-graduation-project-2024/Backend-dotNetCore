@@ -118,7 +118,6 @@ namespace Learntendo_backend.Data
                 if (exam.XpCollected > 0)
                 {
                     user.TotalXp += exam.XpCollected;
-                    /////////////////////////////////////////
                     user.WeeklyXp += exam.XpCollected;
                     user.MonthlyXp += exam.XpCollected;
                 }
