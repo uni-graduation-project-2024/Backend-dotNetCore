@@ -36,7 +36,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("defaultDbContext"));
 });
-////////////
+
 
 
 //jwtSettings
@@ -57,7 +57,7 @@ if (string.IsNullOrWhiteSpace(secretKey))
     throw new InvalidOperationException("JWT Secret Key is missing or empty in configuration.");
 }
 var key = Encoding.UTF8.GetBytes(secretKey);
-////////////////////////////////////////////////////////
+
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -80,14 +80,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
-            /////
+       
             RoleClaimType = "role"
-            //////
+            
         };
     
     });
-////////////
-///
+
 
 builder.Logging.AddConsole();
 builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -120,11 +119,10 @@ builder.Services.AddScoped<GroupService>();
 var app = builder.Build();
 //<summary>
 
-app.UseHangfireServer();
-app.UseHangfireDashboard();
 
-app.MapHangfireDashboard();
 app.UseHangfireDashboard();
+app.MapHangfireDashboard();
+
 
 RecurringJob.AddOrUpdate<LeagueService>(
             "reset-monthly-xp",
@@ -132,17 +130,23 @@ RecurringJob.AddOrUpdate<LeagueService>(
             Cron.Monthly);
 
 
+//RecurringJob.AddOrUpdate<GroupService>(
+//    "weekly-group-assignment",
+//    service => service.AssignUsersToGroupsTest(),
+//    Cron.Weekly(DayOfWeek.Saturday, 0, 0),
+//    new RecurringJobOptions
+//    {
+//        TimeZone = TimeZoneInfo.Local
+//    });
 
 RecurringJob.AddOrUpdate<GroupService>(
-    job => job.AssignUsersToGroups(),
-    Cron.Weekly(DayOfWeek.Saturday, 0, 0));
-
-
-//RecurringJob.AddOrUpdate<DataRepository<User>>(
-//    "daily-challenge-check",
-//    repo => repo.CheckDailyChallengeForAllUsers(),
-//    Cron.Daily(0, 0)
-//);
+    "test-group-assignment",
+    service => service.AssignUsersToGroupsTest(),
+    "*/30 * * * *", 
+    new RecurringJobOptions
+    {
+        TimeZone = TimeZoneInfo.Local
+    });
 
 
 //https://localhost:7078/hangfire HangfireDashboard
@@ -152,12 +156,34 @@ using (var scope = app.Services.CreateScope())
     RecurringJob.AddOrUpdate("daily-reset", () => service.ResetDailyChallenges(), "0 0 * * *");
 }
 //</summary>
+//maha
+//RecurringJob.AddOrUpdate<GroupService>(
+//    job => job.AssignUsersToGroups(),
+//    Cron.Weekly(DayOfWeek.Saturday, 0, 0));
+
+
+
+
+
 
 if (string.IsNullOrEmpty(app.Environment.WebRootPath))
 {
     app.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 }//==builder.WebHost.UseWebRoot("wwwroot");
 app.UseStaticFiles();
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // استدعاء دالة SeedAdmin لإضافة Admin إذا لم يكن موجودًا
 using (var scope = app.Services.CreateScope())
