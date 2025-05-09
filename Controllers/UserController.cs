@@ -83,6 +83,7 @@ namespace Learntendo_backend.Controllers
                     user.StreakScore,
                     user.Coins,
                     user.GenerationPower,
+                    user.FreezeStreak,
 
                 };
 
