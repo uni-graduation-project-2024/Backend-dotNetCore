@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Learntendo_backend.Services
 {
    
-    public class LeagueService : BackgroundService
+    public class LeagueService 
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IMapper _mapper; 
@@ -78,10 +78,7 @@ namespace Learntendo_backend.Services
             }
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            throw new NotImplementedException();
-        }
+      
     }
 
 }

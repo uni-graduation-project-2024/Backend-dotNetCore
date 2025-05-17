@@ -8,7 +8,7 @@ using Group = Learntendo_backend.Models.Group;
 
 namespace Learntendo_backend.Services
 {
-    public class GroupService : BackgroundService
+    public class GroupService 
     {
         private readonly DataContext _db;
         private readonly IServiceScopeFactory _scopeFactory;
@@ -26,11 +26,6 @@ namespace Learntendo_backend.Services
             return date.AddDays(-diff).Date;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            throw new NotImplementedException();
-
-        }
         public enum UserLevel
         {
             Newbie =0,
@@ -68,8 +63,15 @@ namespace Learntendo_backend.Services
                 }
                
                 _db.SaveChanges();
-                var oldGroups = _db.Group.ToList();
-                _db.Group.RemoveRange(oldGroups);
+                //var oldGroups = _db.Group.ToList();
+                //_db.Group.RemoveRange(oldGroups);
+                var oldGroups = _db.Group.AsNoTracking().ToList();
+
+                foreach (var group in oldGroups)
+                {
+                    _db.Group.Attach(group); 
+                    _db.Group.Remove(group); 
+                }
                 _db.SaveChanges();
                 var newWeek = new Group
                 {
