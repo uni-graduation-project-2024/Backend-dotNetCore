@@ -185,6 +185,39 @@ namespace Learntendo_backend.Controllers
             });
         }
 
+        [HttpPost("PurchaseGenerationPower/{userId}")]
+        public async Task<IActionResult> PurchaseGenerationPower(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            if (user.GenerationPower == 5)
+            {
+                return BadRequest("Maximum Generation Power reached.");
+            }
+
+            if (user.Coins < 100)
+            {
+                return BadRequest("Not enough coins to purchase Generation Power.");
+            }
+
+           
+            user.GenerationPower += 1;
+            user.Coins -= 100;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "Generation Power purchased successfully.",
+                NewGenerationPower = user.GenerationPower,
+                RemainingCoins = user.Coins
+            });
+        }
 
     }
 }

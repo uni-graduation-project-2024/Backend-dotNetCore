@@ -95,6 +95,56 @@ namespace Learntendo_backend.Controllers
             var examDto = _map.Map<ExamDto>(exam);
             return Ok(examDto);
         }
+        /// 
+        //public async Task<List<Exam>> GetByFileIdAsync(int fileId)
+        //{
+        //    return await _db.Exam
+        //        .Where(e => e.FileId == fileId)
+        //        .ToListAsync();
+        //}
+        [HttpGet("file/{File}")]
+        public async Task<IActionResult> GetExamsByFileId(int fileId)
+        {
+            var exams = await _examRepo.GetByFileIdAsync(fileId);
+
+            if (exams == null || !exams.Any())
+            {
+                return NotFound($"No exams found for file ID {fileId}");
+            }
+
+            var examDtos = _map.Map<List<ExamDto>>(exams);
+            return Ok(examDtos);
+        }
+
+        [HttpGet("SubjectFiles/{subjectId}")]
+        public async Task<IActionResult> GetFilesBySubjectId(int subjectId)
+        {
+            var subjectExists = await _db.Subject.AnyAsync(s => s.SubjectId == subjectId);
+            if (!subjectExists)
+            {
+                return NotFound("Subject not found.");
+            }
+
+            var files = await _db.Files
+                .Where(f => f.SubjectId == subjectId)
+                .Select(f => new
+                {
+                    f.FileId,
+                    f.FileName
+                })
+                .ToListAsync();
+
+            if (files == null || !files.Any())
+            {
+                return NotFound("No files found for this subject.");
+            }
+
+            return Ok(files);
+        }
+
+
+        /// 
+
 
         [HttpGet("all/{userId}")]
         public async Task<IActionResult> GetAllExamByUserId(int userId,[FromQuery] int? subId=null)

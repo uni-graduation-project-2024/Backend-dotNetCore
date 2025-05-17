@@ -240,20 +240,20 @@ namespace Learntendo_backend.Data
                     user.DateCompleteDailyChallenge = today;
                 }
             }
-            else
-            {
+            //else
+            //{
 
-                //if user streakscore is equal to zero no need to decrease the user freezeStreak
-                if (user.StreakScore != 0 && user.FreezeStreak > 0) // if user streak score not equal zero && freezeStreak > 0
-                {
-                    user.FreezeStreak -= 1;
-                }
-                else
-                {
-                    user.StreakScore = 0;
-                }
+            //    if user streakscore is equal to zero no need to decrease the user freezeStreak
+            //    if (user.StreakScore != 0 && user.FreezeStreak > 0) // if user streak score not equal zero && freezeStreak > 0
+            //    {
+            //        user.FreezeStreak -= 1;
+            //    }
+            //    else
+            //    {
+            //        user.StreakScore = 0;
+            //    }
 
-            }
+            //}
 
             // تحديث Streak Score
             var existexam = await _db.Exam.CountAsync(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0);
@@ -271,6 +271,13 @@ namespace Learntendo_backend.Data
         public Task UpdatePostExamRelatedTable(object examId)
         {
             throw new NotImplementedException();
+        }
+
+        async Task<List<Exam>> IDataRepository<T>.GetByFileIdAsync(int fileId)
+        {
+            return await _db.Exam
+           .Where(e => e.FileId == fileId)
+           .ToListAsync();
         }
         //public async Task CheckDailyChallengeForAllUsers()
         //{
