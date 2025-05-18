@@ -10,6 +10,7 @@ using System.Text;
 using Learntendo_backend.Mapping;
 using Learntendo_backend.Services;
 using Hangfire;
+using Microsoft.OpenApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,20 +51,12 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
-
-var secretKey = builder.Configuration["JwtSettings:SecretKey"];
-if (string.IsNullOrWhiteSpace(secretKey))
-{
-    throw new InvalidOperationException("JWT Secret Key is missing or empty in configuration.");
-}
-var key = Encoding.UTF8.GetBytes(secretKey);
-////////////////////////////////////////////////////////
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-         var secretKey = builder.Configuration["JwtSettings:SecretKey"];
-       // var secretKey = _configuration["JwtSettings:SecretKey"];
+        var secretKey = builder.Configuration["JwtSettings:SecretKey"];
+
         if (string.IsNullOrWhiteSpace(secretKey))
         {
             throw new InvalidOperationException("JWT Secret Key is missing or empty in configuration.");
@@ -72,17 +65,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["JwtSettings:Audience"],
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero,
-            /////
-            RoleClaimType = "role"
-            //////
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
         };
     
     });
@@ -100,7 +90,36 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "Your API Title", Version = "v1" });
+
+    // Enable JWT token support
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter JWT token like this: Bearer {your token}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 
 builder.Services.AddHangfire(config =>

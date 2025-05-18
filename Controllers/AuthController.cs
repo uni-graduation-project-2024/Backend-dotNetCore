@@ -8,20 +8,22 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
+using System.Text;
 
 
 namespace Learntendo_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
     public class AuthController : ControllerBase
     {
         private readonly IAuthRepository _authRepository;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IAuthRepository authRepository)
+        public AuthController(IAuthRepository authRepository, IConfiguration configuration)
         {
             _authRepository = authRepository;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -34,33 +36,32 @@ namespace Learntendo_backend.Controllers
             var token = GenerateJwtToken(userInData);
             return Ok(new { token });
         }
+
         private string GenerateJwtToken(User user)
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, "User")
-            };
+            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Role, "User")
+        };
 
-            var key = new byte[64];
+            // جلب المفتاح السري من الإعدادات appsettings.json
+            var secretKey = _configuration["JwtSettings:SecretKey"];
+            var keyBytes = Encoding.UTF8.GetBytes(secretKey);
 
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(key);
-            }
-
-            var securityKey = new SymmetricSecurityKey(key);
-
+            var securityKey = new SymmetricSecurityKey(keyBytes);
             var creds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                NotBefore = DateTime.Now,
-                Expires = DateTime.Now.AddDays(1),
-                SigningCredentials = creds
+                NotBefore = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddDays(1),
+                SigningCredentials = creds,
+                Issuer = _configuration["JwtSettings:Issuer"],
+                Audience = _configuration["JwtSettings:Audience"]
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -68,8 +69,6 @@ namespace Learntendo_backend.Controllers
 
             return tokenHandler.WriteToken(token);
         }
-       
-
 
         [HttpPost("registeruser")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto RegisterDto)
@@ -93,6 +92,7 @@ namespace Learntendo_backend.Controllers
 
             return Ok();
         }
-
     }
+
+   
 }
