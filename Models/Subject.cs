@@ -13,6 +13,8 @@ namespace Learntendo_backend.Models
         [Required]
         public required string SubjectName { get; set; }
 
+        public required string SubjectColor { get; set; }
+
         public int NumExams { get; set; } = 0;
 
         public int TotalQuestions { get; set; } = 0;

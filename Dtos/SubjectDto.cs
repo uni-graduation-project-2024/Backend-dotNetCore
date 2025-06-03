@@ -6,5 +6,7 @@ namespace Learntendo_backend.Dtos
     {
         [Required]
         public string SubjectName { get; set; }
+
+        public string SubjectColor { get; set; }
     }
 }

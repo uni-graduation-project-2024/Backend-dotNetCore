@@ -65,7 +65,7 @@ namespace Learntendo_backend.Controllers
 
    
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSubject(int id, SubjectDto subjectDto)
+        public async Task<IActionResult> UpdateSubject(int id, string subjectName)
         {
             var subject = await _subjectRepo.GetByIdFun(id);
             if (subject == null)
@@ -74,10 +74,10 @@ namespace Learntendo_backend.Controllers
             }
 
 
-            _map.Map(subjectDto, subject);
+            subject.SubjectName = subjectName;
 
             await _subjectRepo.UpdateFun(subject);
-            return Ok(subjectDto);
+            return Ok(subjectName);
         }
 
         [HttpDelete("{id}")]
