@@ -164,7 +164,8 @@ namespace Learntendo_backend.Controllers
                 .Select(f => new
                 {
                     f.FileId,
-                    f.FileName
+                    f.FileName,
+                    f.NumOfExams,
                 })
                 .ToListAsync();
 

@@ -11,6 +11,8 @@ namespace Learntendo_backend.Models
         public string FilePath { get; set; }
         public string FileName { get; set; }
         public int? SubjectId { get; set; }
+
+        public int? NumOfExams { get; set; }
         public DateTime CreatedDate { get; set; }
         [ForeignKey("UserId")]
         public int? UserId { get; set; }
