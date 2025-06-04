@@ -2,50 +2,24 @@
 using Learntendo_backend.Data;
 using Learntendo_backend.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Learntendo_backend.Services
 {
-    public class DailyResetService : BackgroundService
+
+    public class DailyResetService
     {
         private readonly DataContext _db;
-        private readonly IServiceScopeFactory _scopeFactory;
 
-
-        public DailyResetService(IServiceScopeFactory scopeFactory, DataContext db)
+        public DailyResetService(DataContext db)
         {
             _db = db;
-            _scopeFactory = scopeFactory;
         }
-
-        //public class DailyChallengeService : BackgroundService
-        //{
-
-
-        //public DailyChallengeService(IServiceScopeFactory scopeFactory)
-        //{
-        //    _scopeFactory = scopeFactory;
-        //}
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                using (var scope = _scopeFactory.CreateScope())
-                {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
-                    var challengeService = scope.ServiceProvider.GetRequiredService<DailyResetService>();
-
-                    //await challengeService.UpdateDailyChallengesForAllUsers();
-                }
-
-                var now = DateTime.UtcNow;
-                var nextRun = now.Date.AddDays(1);
-                var delay = nextRun - now;
-                await Task.Delay(delay, stoppingToken);
-            }
-        }
-
 
         public async Task ResetDailyChallenges()
         {
@@ -54,6 +28,7 @@ namespace Learntendo_backend.Services
             foreach (var user in users)
             { 
                 if (user.DailyXp<=0 && user.StreakScore > 0)
+
                 {
                     if (user.FreezeStreak > 0)
                         user.FreezeStreak -= 1;
@@ -75,9 +50,5 @@ namespace Learntendo_backend.Services
 
             await _db.SaveChangesAsync();
         }
-
-
     }
 }
-
-    
