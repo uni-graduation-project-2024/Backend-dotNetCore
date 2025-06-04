@@ -1,62 +1,62 @@
 ﻿using Learntendo_backend.Data;
 using Learntendo_backend.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Learntendo_backend.Services
 {
-    public class DailyResetService 
+    public class DailyChallengeService : BackgroundService
     {
-        private readonly DataContext _db;
-        //private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-
-        public DailyResetService(IServiceScopeFactory scopeFactory, DataContext db)
+        public DailyChallengeService(IServiceScopeFactory scopeFactory)
         {
-            _db = db;
-            //_scopeFactory = scopeFactory;
+            _scopeFactory = scopeFactory;
         }
 
-        //public class DailyChallengeService : BackgroundService
-        //{
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+                    var challengeService = new DailyResetService(dbContext);
+                    await challengeService.ResetDailyChallenges();
+                }
 
-
-        //public DailyChallengeService(IServiceScopeFactory scopeFactory)
-        //{
-        //    _scopeFactory = scopeFactory;
-        //}
-
-        //protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        //{
-        //    while (!stoppingToken.IsCancellationRequested)
-        //    {
-        //        using (var scope = _scopeFactory.CreateScope())
-        //        {
-        //            var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
-        //            var challengeService = scope.ServiceProvider.GetRequiredService<DailyResetService>();
-
-        //            //await challengeService.UpdateDailyChallengesForAllUsers();
-        //        }
-
+                // انتظار حتى منتصف الليل القادم
                 var now = DateTime.UtcNow;
                 var nextRun = now.Date.AddDays(1);
                 var delay = nextRun - now;
                 await Task.Delay(delay, stoppingToken);
             }
         }
+    }
 
+    public class DailyResetService
+    {
+        private readonly DataContext _db;
+
+        public DailyResetService(DataContext db)
+        {
+            _db = db;
+        }
 
         public async Task ResetDailyChallenges()
         {
-            var users = _db.User.ToList();
+            var users = await _db.User.ToListAsync();
             var today = DateTime.UtcNow.Date;
             var yesterday = today.AddDays(-1);
 
             foreach (var user in users)
             {
-             
-                bool hasRecentExam = await _db.Exam
-                .AnyAsync(e =>
+                bool hasRecentExam = await _db.Exam.AnyAsync(e =>
                     e.UserId == user.UserId &&
                     e.XpCollected > 0 &&
                     (e.CreatedDate.Date == today || e.CreatedDate.Date == yesterday));
@@ -78,9 +78,5 @@ namespace Learntendo_backend.Services
 
             await _db.SaveChangesAsync();
         }
-
-
     }
 }
-
-    
