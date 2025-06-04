@@ -57,9 +57,9 @@ namespace Learntendo_backend.Controllers
             {
                 return NotFound($"User with {userId} not found");
             }
-            else if (user.GenerationPower <= 0) //change NumFilesUploadedToday -> GenerationPower
+            else if (user.GenerationPower <= 0)
             {
-                return NotFound();
+                return NotFound("Sorry, You are out of generation power.");
             }
             else
             {
@@ -70,19 +70,25 @@ namespace Learntendo_backend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateExam([FromBody] ExamDto examDto)
         {
-            var today = DateTime.Today;
-
-            int examsToday = await _db.Exam
-                .Where(e => e.UserId == examDto.UserId && e.CreatedDate >= today)
-                .CountAsync();
-
             var exam = _map.Map<Exam>(examDto);
             exam.TfQuestionsData = null;
             exam.CreatedDate = DateTime.Now;    
             await _examRepo.AddFun(exam);
-            await _examRepo.UpdatePostExamRelatedTable(exam.ExamId);
+            await _examRepo.UpdateUserTable(exam, IsExamNew:true);
             return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
           
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> RetryExam([FromBody] ExamDto examDto)
+        {
+            var exam = _map.Map<Exam>(examDto);
+            exam.TfQuestionsData = null;
+            exam.CreatedDate = DateTime.Now; // UpdatedDate
+            await _examRepo.UpdateFun(exam);
+            await _examRepo.UpdateUserTable(exam, IsExamNew:false);
+            return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
+
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetExamById(int id)
@@ -227,18 +233,6 @@ namespace Learntendo_backend.Controllers
 
                 return Ok("Exam moved successfully.");
             }
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> RetryExam([FromBody] ExamDto examDto)
-        {
-            var exam = _map.Map<Exam>(examDto);
-            exam.TfQuestionsData = null;
-            exam.CreatedDate = DateTime.Now; // UpdatedDate
-            await _examRepo.UpdateFun(exam);
-            await _examRepo.UpdatePostExamRelatedTable(exam.ExamId);
-            return CreatedAtAction(nameof(GetExamById), new { id = exam.ExamId }, exam);
-
         }
 
 

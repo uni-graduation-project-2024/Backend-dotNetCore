@@ -27,12 +27,20 @@ namespace Learntendo_backend.Models
         public required string Email { get; set; }
 
         public int TotalQuestion { get; set; } = 0;
+
+        public int TotalExamsCreated { get; set; } = 0;
+
+        public int NumExamCreatedToday { get; set; } = 0;
+
+
         public int GenerationPower { get; set; } = 5; //change NumFilesUploadedToday -> GenerationPower
         public int NumQuestionSolToday { get; set; } = 0;
 
         public int Coins { get; set; } = 0;
 
         public int StreakScore { get; set; } = 0;
+
+        public int MaximunStreakScore { get; set; } = 0;
 
         public int FreezeStreak { get; set; } = 5;
 
@@ -66,7 +74,7 @@ namespace Learntendo_backend.Models
         [Required]
         public DateTime JoinedDate { get; set; }
 
-        public bool? IfStreakActive { get; set; }
+        public bool IfStreakActive { get; set; } = false;
         public int? GroupId { get; set; }
         [JsonIgnore]
         [IgnoreDataMember]
@@ -82,6 +90,8 @@ namespace Learntendo_backend.Models
 
         [Column(TypeName = "int")] // يتم تخزين `enum` كرقم
         public UserLevel Level { get; set; } = UserLevel.Newbie;
+
+        public int FinishFirstInGroupChallenge { get; set; } = 0; // Number of times user finishes at first place in the weekly leaderboard challenge
 
 
 

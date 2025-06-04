@@ -73,7 +73,7 @@ namespace Learntendo_backend.Controllers
 
 
         [HttpGet("user-navbar-info")]
-        public async Task<IActionResult> userNavbarInfo(int userId)
+        public async Task<IActionResult> UserNavbarInfo(int userId)
         {
             try
             {
@@ -81,6 +81,7 @@ namespace Learntendo_backend.Controllers
                 var userNavbarInfo = new
                 {
                     user.StreakScore,
+                    user.IfStreakActive,
                     user.Coins,
                     user.GenerationPower,
                     user.FreezeStreak,
@@ -97,7 +98,7 @@ namespace Learntendo_backend.Controllers
         
         [HttpGet("user-profile")]
         // [Authorize(Roles = "Admin")]  // Ensure only admins can view users
-        public async Task<IActionResult> userProfile(int userId)
+        public async Task<IActionResult> UserProfile(int userId)
         {
 
             try

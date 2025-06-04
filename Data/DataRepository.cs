@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Runtime.ConstrainedExecution;
+using Aspose.Words;
 using Learntendo_backend.Dtos.Learntendo_backend.DTOs;
 using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -89,44 +90,47 @@ namespace Learntendo_backend.Data
                 await _db.SaveChangesAsync();
             }
         }
-        public async Task UpdatePostExamRelatedTable(int examId)
+        public async Task UpdateUserTable(Exam exam, bool isNewExam)
         {
-            var exam = await _db.Exam.FindAsync(examId);
-            if (exam == null) return;
-            /// The subjectId of any newly created Exam is null
-            /// Incorrect logic, Retrying any exam again shouldn't update any subject releated fields
-
-            //if (exam.SubjectId != null)
-            //{
-            //    var subject = await _db.Subject.FindAsync(exam.SubjectId);
-            //    if (subject != null)
-            //    {
-            //        subject.NumExams += 1;
-            //        subject.TotalQuestions += exam.NumQuestions;
-            //        _db.Subject.Update(subject);
-            //    }
-
-            //}
-            //else
-            //{
-            //    exam.SubjectId = null;
-            //}
             var user = await _db.User.FindAsync(exam.UserId);
-            if (user != null)
+            if (user == null) return;
+            
+            user.TotalQuestion += exam.NumQuestions;
+            user.NumQuestionSolToday += exam.NumQuestions;
+            user.LastExamDate = DateTime.Now;
+
+            if (isNewExam)
             {
-                user.TotalQuestion += exam.NumQuestions;
-                if (exam.XpCollected > 0)
-                {
-                    user.TotalXp += exam.XpCollected;
-                    /////////////////////////////////////////
-                    user.WeeklyXp += exam.XpCollected;
-                    user.MonthlyXp += exam.XpCollected;
-                }
-
-                await CheckDailyChallenge(user.UserId);
-
-                _db.User.Update(user);
+                user.TotalExamsCreated += 1;
+                user.NumExamCreatedToday += 1;
             }
+
+            // Update user XP scores
+            if (exam.XpCollected > 0)
+            {
+                user.TotalXp += exam.XpCollected;
+                user.DailyXp += exam.XpCollected;
+                user.WeeklyXp += exam.XpCollected;
+                user.MonthlyXp += exam.XpCollected;
+            }
+
+            // Check User Daily Challenge Completion
+            if (!user.CompleteDailyChallenge && user.DailyXp >= 30) // if user did not complete daily challenge && user dailyXp > 50
+            {
+                user.Coins += 5;
+                user.CompleteDailyChallenge = true;
+                user.DateCompleteDailyChallenge = DateTime.Now;
+            }
+
+            // Check User Streak Score if not Active then make is active and increase it by 1
+            if (!user.IfStreakActive)
+            {
+                user.StreakScore += 1;
+                user.IfStreakActive = true;
+            }
+
+            _db.User.Update(user);
+            
 
             await _db.SaveChangesAsync();
         }
@@ -233,12 +237,7 @@ namespace Learntendo_backend.Data
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.NumQuestions);
 
-                if (!user.CompleteDailyChallenge && user.DailyXp >= 20) // if user did not complete daily challenge && user dailyXp > 50
-                {
-                    user.Coins += 5;
-                    user.CompleteDailyChallenge = true;
-                    user.DateCompleteDailyChallenge = today;
-                }
+                
             }
             //else
             //{
@@ -268,10 +267,6 @@ namespace Learntendo_backend.Data
             await _db.SaveChangesAsync();
         }
 
-        public Task UpdatePostExamRelatedTable(object examId)
-        {
-            throw new NotImplementedException();
-        }
 
         async Task<List<Exam>> IDataRepository<T>.GetByFileIdAsync(int fileId)
         {

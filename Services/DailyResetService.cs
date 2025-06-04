@@ -1,4 +1,5 @@
-﻿using Learntendo_backend.Data;
+﻿using iText.Layout.Properties.Grid;
+using Learntendo_backend.Data;
 using Learntendo_backend.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -49,31 +50,27 @@ namespace Learntendo_backend.Services
         public async Task ResetDailyChallenges()
         {
             var users = _db.User.ToList();
-            var today = DateTime.UtcNow.Date;
-            var yesterday = today.AddDays(-1);
 
             foreach (var user in users)
-            {
-             
-                bool hasRecentExam = await _db.Exam
-                .AnyAsync(e =>
-                    e.UserId == user.UserId &&
-                    e.XpCollected > 0 &&
-                    (e.CreatedDate.Date == today || e.CreatedDate.Date == yesterday));
-
-                if (!hasRecentExam && user.StreakScore > 0)
+            { 
+                if (user.DailyXp<=0 && user.StreakScore > 0)
                 {
                     if (user.FreezeStreak > 0)
                         user.FreezeStreak -= 1;
                     else
+                    {
+                        user.MaximunStreakScore = Math.Max(user.MaximunStreakScore, user.StreakScore);
                         user.StreakScore = 0;
+                    }
                 }
 
                 user.CompleteDailyChallenge = false;
                 user.DateCompleteDailyChallenge = null;
                 user.DailyXp = 0;
                 user.NumQuestionSolToday = 0;
+                user.NumExamCreatedToday = 0;
                 user.GenerationPower = 5;
+                user.IfStreakActive = false;
             }
 
             await _db.SaveChangesAsync();
