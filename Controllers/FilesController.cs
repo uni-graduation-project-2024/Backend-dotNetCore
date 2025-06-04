@@ -176,19 +176,7 @@ namespace Learntendo_backend.Controllers
             return Ok(files);
         }
 
-        //public string GetMimeType(string extension)
-        //{
-        //    return extension switch
-        //    {
-        //        ".pdf" => "application/pdf",
-        //        ".doc" => "application/msword",
-        //        ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        //        ".ppt" => "application/vnd.ms-powerpoint",
-        //        ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        //        _ => "application/octet-stream"
-        //    };
-        //}
-
+        
 
     }
 }

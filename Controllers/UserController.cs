@@ -83,6 +83,7 @@ namespace Learntendo_backend.Controllers
                     user.StreakScore,
                     user.Coins,
                     user.GenerationPower,
+                    user.FreezeStreak,
 
                 };
 
@@ -102,9 +103,19 @@ namespace Learntendo_backend.Controllers
             try
             {
                 var user = await _userRepo.GetByIdFun(userId);
-                var userDto = _mapper.Map<UserDto>(user);
+                var userProfileInfo = new
+                {
+                    username = user.Username,
+                    email = user.Email,
+                    joinedDate = user.JoinedDate,
+                    totalXp = user.TotalXp,
+                    totalQuestion = user.TotalQuestion,
+                    streakScore = user.StreakScore,
+                    level = user.Level
 
-                return Ok(userDto);
+                };
+
+                return Ok(userProfileInfo);
             }
             catch
             {
@@ -184,6 +195,39 @@ namespace Learntendo_backend.Controllers
             });
         }
 
+        [HttpPost("PurchaseGenerationPower/{userId}")]
+        public async Task<IActionResult> PurchaseGenerationPower(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            if (user.GenerationPower == 5)
+            {
+                return BadRequest("Maximum Generation Power reached.");
+            }
+
+            if (user.Coins < 100)
+            {
+                return BadRequest("Not enough coins to purchase Generation Power.");
+            }
+
+           
+            user.GenerationPower += 1;
+            user.Coins -= 100;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "Generation Power purchased successfully.",
+                NewGenerationPower = user.GenerationPower,
+                RemainingCoins = user.Coins
+            });
+        }
 
     }
 }
