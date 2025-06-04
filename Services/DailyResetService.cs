@@ -1,5 +1,6 @@
 ﻿using Learntendo_backend.Data;
 using Learntendo_backend.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 
 namespace Learntendo_backend.Services
@@ -37,32 +38,48 @@ namespace Learntendo_backend.Services
         //            //await challengeService.UpdateDailyChallengesForAllUsers();
         //        }
 
-        //        // انتظر حتى منتصف الليل لتنفيذ المهمة يومياً
-        //        var now = DateTime.UtcNow;
-        //        var nextRun = now.Date.AddDays(1);
-        //        var delay = nextRun - now;
-        //        await Task.Delay(delay, stoppingToken);
-        //    }
-        //}
+                var now = DateTime.UtcNow;
+                var nextRun = now.Date.AddDays(1);
+                var delay = nextRun - now;
+                await Task.Delay(delay, stoppingToken);
+            }
+        }
 
 
-
-        public void ResetDailyChallenges()
+        public async Task ResetDailyChallenges()
         {
             var users = _db.User.ToList();
+            var today = DateTime.UtcNow.Date;
+            var yesterday = today.AddDays(-1);
 
             foreach (var user in users)
             {
+             
+                bool hasRecentExam = await _db.Exam
+                .AnyAsync(e =>
+                    e.UserId == user.UserId &&
+                    e.XpCollected > 0 &&
+                    (e.CreatedDate.Date == today || e.CreatedDate.Date == yesterday));
+
+                if (!hasRecentExam && user.StreakScore > 0)
+                {
+                    if (user.FreezeStreak > 0)
+                        user.FreezeStreak -= 1;
+                    else
+                        user.StreakScore = 0;
+                }
+
                 user.CompleteDailyChallenge = false;
                 user.DateCompleteDailyChallenge = null;
                 user.DailyXp = 0;
                 user.NumQuestionSolToday = 0;
                 user.GenerationPower = 5;
-
             }
 
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
+
+
     }
 }
 

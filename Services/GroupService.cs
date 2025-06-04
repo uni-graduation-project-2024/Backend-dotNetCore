@@ -8,8 +8,7 @@ using Group = Learntendo_backend.Models.Group;
 
 namespace Learntendo_backend.Services
 {
-
-    public class GroupService
+    public class GroupService 
     {
         private readonly DataContext _db;
 
@@ -19,39 +18,59 @@ namespace Learntendo_backend.Services
         }
 
 
-        public void AssignUsersToGroupsTest()
+        public enum UserLevel
         {
-            var now = DateTime.UtcNow;
-            var startOfTestPeriod = now;
-            var endOfTestPeriod = now.AddMinutes(29); 
+            Newbie =0,
+            Beginner =1,
+            Professional =2,
+            Expert =3,
+            Master =4
+        }
+        public void AssignUsersToGroups()
+        {
 
-            var groupedUsers = _db.User
-                .Where(u => u.GroupId != null)
-                .GroupBy(u => u.GroupId)
-                .ToList();
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var _db = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+                var startOfWeek = GetStartOfWeek(DateTime.UtcNow);
+                var endOfWeek = startOfWeek.AddDays(6).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+                var groupedUsers = _db.User
+               .Where(u => u.GroupId != null) 
+               .GroupBy(u => u.GroupId) 
+               .ToList();
 
             foreach (var group in groupedUsers)
             {
                 var topUsers = group.OrderByDescending(u => u.WeeklyXp).ToList();
 
-                if (topUsers.Any())
-                {
-                    topUsers[0].Coins += 10; 
-                    UpgradeLevel(topUsers[0]);
+                    if (topUsers.Any())
+                    {
+                        topUsers[0].Coins += 100;
+                        UpgradeLevel(topUsers[0]); 
+                    }
+                    if (topUsers.Count > 1) topUsers[1].Coins += 70;
+                    if (topUsers.Count > 2) topUsers[2].Coins += 50;
+                    if (topUsers.Any()) DowngradeLevel(topUsers.Last()); 
                 }
-                if (topUsers.Count > 1) topUsers[1].Coins += 5;
-                if (topUsers.Count > 2) topUsers[2].Coins += 2;
-                if (topUsers.Any()) DowngradeLevel(topUsers.Last());
-            }
+               
+                _db.SaveChanges();
+                //var oldGroups = _db.Group.ToList();
+                //_db.Group.RemoveRange(oldGroups);
+                var oldGroups = _db.Group.AsNoTracking().ToList();
 
-            _db.SaveChanges();
-
-            var testGroup = new Group
-            {
-                GroupName = $"TestGroup {now:yyyy-MM-dd HH:mm:ss}",
-                StartDate = startOfTestPeriod,
-                EndDate = endOfTestPeriod
-            };
+                foreach (var group in oldGroups)
+                {
+                    _db.Group.Attach(group); 
+                    _db.Group.Remove(group); 
+                }
+                _db.SaveChanges();
+                var newWeek = new Group
+                {
+                    GroupName = $"Week {startOfWeek:yyyy-MM-dd}",
+                    StartDate = startOfWeek,
+                    EndDate = endOfWeek
+                };
 
             _db.Group.Add(testGroup);
             _db.SaveChanges();
