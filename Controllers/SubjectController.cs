@@ -64,8 +64,8 @@ namespace Learntendo_backend.Controllers
         }
 
    
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSubject(int id, string subjectName)
+        [HttpPut("updateSubjectName")]
+        public async Task<IActionResult> UpdateSubjectName(int id, string subjectNewName)
         {
             var subject = await _subjectRepo.GetByIdFun(id);
             if (subject == null)
@@ -74,10 +74,26 @@ namespace Learntendo_backend.Controllers
             }
 
 
-            subject.SubjectName = subjectName;
+            subject.SubjectName = subjectNewName;
 
             await _subjectRepo.UpdateFun(subject);
-            return Ok(subjectName);
+            return Ok(subjectNewName);
+        }
+
+        [HttpPut("updateSubjectColor")]
+        public async Task<IActionResult> UpdateSubjectColor(int id, string subjectNewColor)
+        {
+            var subject = await _subjectRepo.GetByIdFun(id);
+            if (subject == null)
+            {
+                return NotFound($"subject with this id {id} not found");
+            }
+
+
+            subject.SubjectColor = subjectNewColor;
+
+            await _subjectRepo.UpdateFun(subject);
+            return Ok(subjectNewColor);
         }
 
         [HttpDelete("{id}")]
