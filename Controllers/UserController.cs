@@ -267,6 +267,39 @@ namespace Learntendo_backend.Controllers
         }
 
 
+        [HttpDelete("delete-account/{userId}")]
+        public async Task<IActionResult> DeleteAccount(int userId)
+        {
+            var user = await _context.User
+                .Include(u => u.Subjects)
+                    .ThenInclude(s => s.Exams)
+                .Include(u => u.Exams) 
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            if (user.Exams != null && user.Exams.Any())
+            {
+                _context.Exam.RemoveRange(user.Exams);
+            }
+
+            foreach (var subject in user.Subjects)
+            {
+                if (subject.Exams != null && subject.Exams.Any())
+                {
+                    _context.Exam.RemoveRange(subject.Exams);
+                }
+            }
+
+            _context.Subject.RemoveRange(user.Subjects);
+
+            _context.User.Remove(user);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "User and all related data deleted successfully." });
+        }
 
 
     }
