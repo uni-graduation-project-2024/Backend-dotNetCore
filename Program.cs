@@ -149,23 +149,23 @@ RecurringJob.AddOrUpdate<LeagueService>(
             Cron.Monthly);
 
 
-//RecurringJob.AddOrUpdate<GroupService>(
-//    "weekly-group-assignment",
-//    service => service.AssignUsersToGroupsTest(),
-//    Cron.Weekly(DayOfWeek.Saturday, 0, 0),
-//    new RecurringJobOptions
-//    {
-//        TimeZone = TimeZoneInfo.Local
-//    });
-
 RecurringJob.AddOrUpdate<GroupService>(
-    "test-group-assignment",
-    service => service.AssignUsersToGroupsTest(),
-    "*/30 * * * *", 
+    "weekly-group-assignment",
+    service => service.AssignUsersToGroups(),
+    Cron.Weekly(DayOfWeek.Saturday, 0, 0),
     new RecurringJobOptions
     {
         TimeZone = TimeZoneInfo.Local
     });
+
+//RecurringJob.AddOrUpdate<GroupService>(
+//    "test-group-assignment",
+//    service => service.AssignUsersToGroupsTest(),
+//    "*/30 * * * *", 
+//    new RecurringJobOptions
+//    {
+//        TimeZone = TimeZoneInfo.Local
+//    });
 
 
 //https://localhost:7078/hangfire HangfireDashboard

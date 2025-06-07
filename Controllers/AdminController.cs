@@ -159,6 +159,37 @@ namespace Learntendo_backend.Controllers
 
             return Ok(new { message = "User deleted successfully!" });
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("search-user")]
+        public async Task<IActionResult> SearchUser([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest(new { message = "Query is required." });
+            }
+
+            int userId = 0;
+            bool isUserId = int.TryParse(query, out userId);
+
+            var users = await _context.User
+                .Where(u =>
+                    (isUserId && u.UserId == userId) ||
+                    u.Username.ToLower().Contains(query.ToLower()) ||
+                    u.Email.ToLower().Contains(query.ToLower()))
+                .ToListAsync();
+
+            if (users.Count == 0)
+            {
+                return NotFound(new { message = "No matching users found." });
+            }
+
+            return Ok(users);
+        }
+
+
+
+
     }
 }
 

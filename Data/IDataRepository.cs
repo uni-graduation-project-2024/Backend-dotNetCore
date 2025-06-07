@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Learntendo_backend.Models;
+using Microsoft.EntityFrameworkCore;
 namespace Learntendo_backend.Data
 {
     public interface IDataRepository<T> where T : class
@@ -18,6 +19,9 @@ namespace Learntendo_backend.Data
         Task AddFun(T entity);
         Task UpdateFun(T entity);
         Task DeleteFun(int id);
+
         
+
+
     }
 }

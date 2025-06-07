@@ -11,6 +11,8 @@ using Learntendo_backend.Dtos;
 using Learntendo_backend.Services;
 using System.Collections.Generic;
 using iText.Layout.Element;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Learntendo_backend.Controllers
 {
@@ -21,6 +23,8 @@ namespace Learntendo_backend.Controllers
         private readonly DataContext _context;
         private readonly IDataRepository<User> _userRepo;
         private readonly IMapper _mapper;
+       
+
         public UserController(DataContext context, IDataRepository<User> userRepo, IMapper mapper)
         {
             _context = context;
@@ -229,6 +233,41 @@ namespace Learntendo_backend.Controllers
                 RemainingCoins = user.Coins
             });
         }
+
+
+        [HttpPost("upload-profile-pic/{userId}")]
+        public async Task<IActionResult> UploadProfilePicture(int userId, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "Please upload a valid file." });
+            }
+
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profile_pics");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            user.ProfilePicturePath = $"/profile_pics/{uniqueFileName}";
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Profile picture uploaded successfully.", path = user.ProfilePicturePath });
+        }
+
+
+
 
     }
 }

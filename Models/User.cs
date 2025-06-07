@@ -93,7 +93,7 @@ namespace Learntendo_backend.Models
 
         public int FinishFirstInGroupChallenge { get; set; } = 0; // Number of times user finishes at first place in the weekly leaderboard challenge
 
-
+        public string ProfilePicturePath { get; set; }
 
     }
 }
