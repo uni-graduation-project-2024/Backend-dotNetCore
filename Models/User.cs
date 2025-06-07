@@ -17,7 +17,7 @@ namespace Learntendo_backend.Models
 
         [Required]
         public required string Username { get; set; }
-
+        
         [Required]
         public byte[]? PasswordHash { get; set; }
         public byte[]? PasswordSalt { get; set; }
@@ -94,6 +94,8 @@ namespace Learntendo_backend.Models
         public int FinishFirstInGroupChallenge { get; set; } = 0; // Number of times user finishes at first place in the weekly leaderboard challenge
 
         public string ProfilePicturePath { get; set; }
+
+        public string? ProblemReport { get; set; }
 
     }
 }

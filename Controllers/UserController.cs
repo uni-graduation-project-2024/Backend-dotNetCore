@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using iText.Layout.Element;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace Learntendo_backend.Controllers
 {
@@ -300,6 +301,23 @@ namespace Learntendo_backend.Controllers
 
             return Ok(new { message = "User and all related data deleted successfully." });
         }
+
+
+        [HttpPost("ReportProblem/{userId}")]
+        public async Task<IActionResult> ReportProblem(int userId, [FromBody] string problemText)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            user.ProblemReport = problemText;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Problem report sent successfully" });
+        }
+
 
 
     }

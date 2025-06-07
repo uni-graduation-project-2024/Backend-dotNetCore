@@ -187,6 +187,33 @@ namespace Learntendo_backend.Controllers
             return Ok(users);
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("AllProblemReports")]
+        public async Task<IActionResult> GetAllProblemReports()
+        {
+            var usersWithReports = await _context.User
+                .Where(u => !string.IsNullOrEmpty(u.ProblemReport))
+                .Select(u => new { u.UserId, u.Username,u.ProblemReport })
+                .ToListAsync();
+
+            return Ok(usersWithReports);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("ClearProblem/{userId}")]
+        public async Task<IActionResult> ClearProblem(int userId)
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            user.ProblemReport = null;  
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Report deleted successfully" });
+        }
 
 
 
