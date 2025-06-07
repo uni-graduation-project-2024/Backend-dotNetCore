@@ -1,99 +1,125 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Learntendo_backend.Data;
 using Learntendo_backend.configurations;
-using Microsoft.AspNetCore.Authentication.JwtBearer; 
-using Microsoft.IdentityModel.Tokens; 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Security.Cryptography;
 using Learntendo_backend.Models;
 using System.Text;
 using Learntendo_backend.Mapping;
 using Learntendo_backend.Services;
+using Learntendo_backend.Hubs;
 using Hangfire;
 using Microsoft.OpenApi.Models;
-
+using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
-/////////////////
-builder.Services.AddSignalR();
 
-//AddAutoMapper
-builder.Services.AddControllers();
-builder.Services.AddRazorPages();
-
-// إضافة خدمات CORS
+// Add CORS policy to allow access from specified origins only
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5500", "http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Allow cookies and authorization headers
+    });
 });
 
-
-builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-
+// Add DbContext with SQL Server connection
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("defaultDbContext"));
 });
 
+// Add AutoMapper configuration
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
-
-//jwtSettings
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-builder.Services.Configure<JwtSettings>(jwtSettings);
-
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-
-builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-
+// Register application services
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddScoped<DailyResetService>();
+builder.Services.AddScoped<GroupService>();
+
+// Configure JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"];
+
+if (string.IsNullOrWhiteSpace(secretKey))
+    throw new InvalidOperationException("JWT Secret Key is missing or empty in configuration.");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var secretKey = builder.Configuration["JwtSettings:SecretKey"];
-
-        if (string.IsNullOrWhiteSpace(secretKey))
-        {
-            throw new InvalidOperationException("JWT Secret Key is missing or empty in configuration.");
-        }
-        var key = Encoding.UTF8.GetBytes(secretKey);
-
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-            ValidAudience = builder.Configuration["JwtSettings:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
         };
-    
+
+        // Enable reading JWT token from query string for SignalR
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                // Only extract token if request is for the SignalR hub
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/ChatHub"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
+// Register IUserIdProvider to identify UserId for each SignalR connection based on claims
+builder.Services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
 
-builder.Logging.AddConsole();
-builder.Host.UseSerilog((context, services, configuration) => configuration
-    .ReadFrom.Configuration(context.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()); // Or other sinks like files, databases, etc.
-
-
-// Add services to the container.
+// Add SignalR, Controllers, and Razor Pages support
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
+builder.Services.AddRazorPages();
+
+// Configure Hangfire
+builder.Services.AddHangfire(config =>
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings()
+          .UseSqlServerStorage(builder.Configuration.GetConnectionString("defaultDbContext")));
+
+builder.Services.AddHangfireServer();
+
+// Configure Serilog logging
+builder.Logging.AddConsole();
+builder.Host.UseSerilog((context, services, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration)
+                 .ReadFrom.Services(services)
+                 .Enrich.FromLogContext()
+                 .WriteTo.Console());
+
+// Configure Swagger with JWT support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "Your API Title", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Your API Title",
+        Version = "v1"
+    });
 
-    // Enable JWT token support
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -115,144 +141,102 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
 
-
-builder.Services.AddHangfire(config =>
-    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-          .UseSimpleAssemblyNameTypeSerializer()
-          .UseRecommendedSerializerSettings()
-          .UseSqlServerStorage(builder.Configuration.GetConnectionString("defaultDbContext")));
-
-
-builder.Services.AddHangfireServer();
-builder.Services.AddScoped<DailyResetService>();
-builder.Services.AddScoped<GroupService>();
-
-
-
-
 var app = builder.Build();
-//<summary>
 
+// Enable CORS
+app.UseCors("AllowFrontend");
 
+app.UseRouting();
+
+// Enable Authentication and Authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Map SignalR Hub endpoint
+app.MapHub<ChatHub>("/ChatHub");
+
+// Map controller routes
+app.MapControllers();
+
+// Enable Hangfire Dashboard
 app.UseHangfireDashboard();
 app.MapHangfireDashboard();
 
-
+// Schedule recurring Hangfire jobs
 RecurringJob.AddOrUpdate<LeagueService>(
-            "reset-monthly-xp",
-            x => x.ProcessMonthlyLeague(),
-            Cron.Monthly);
+    "reset-monthly-xp",
+    x => x.ProcessMonthlyLeague(),
+    Cron.Monthly);
 
-
-RecurringJob.AddOrUpdate<GroupService>(
-    "weekly-group-assignment",
-    service => service.AssignUsersToGroups(),
-    Cron.Weekly(DayOfWeek.Saturday, 0, 0),
-    new RecurringJobOptions
-    {
-        TimeZone = TimeZoneInfo.Local
-    });
 
 //RecurringJob.AddOrUpdate<GroupService>(
-//    "test-group-assignment",
+//    "weekly-group-assignment",
 //    service => service.AssignUsersToGroupsTest(),
-//    "*/30 * * * *", 
+//    Cron.Weekly(DayOfWeek.Saturday, 0, 0),
 //    new RecurringJobOptions
 //    {
 //        TimeZone = TimeZoneInfo.Local
 //    });
 
+RecurringJob.AddOrUpdate<GroupService>(
+    "test-group-assignment",
+    service => service.AssignUsersToGroupsTest(),
+    "*/30 * * * *", 
+    new RecurringJobOptions
+    {
+        TimeZone = TimeZoneInfo.Local
+    });
 
-//https://localhost:7078/hangfire HangfireDashboard
+
+// Schedule daily reset job for DailyResetService
 using (var scope = app.Services.CreateScope())
 {
     var service = scope.ServiceProvider.GetRequiredService<DailyResetService>();
     RecurringJob.AddOrUpdate("daily-reset", () => service.ResetDailyChallenges(), "0 0 * * *");
 }
-//</summary>
-//maha
-//RecurringJob.AddOrUpdate<GroupService>(
-//    job => job.AssignUsersToGroups(),
-//    Cron.Weekly(DayOfWeek.Saturday, 0, 0));
 
-
-
-
-
-
-if (string.IsNullOrEmpty(app.Environment.WebRootPath))
-{
-    app.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-}//==builder.WebHost.UseWebRoot("wwwroot");
+// Enable static files and HTTPS redirection
 app.UseStaticFiles();
+app.UseHttpsRedirection();
 
+// Use Swagger only in Development environment
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-// استدعاء دالة SeedAdmin لإضافة Admin إذا لم يكن موجودًا
+// Seed the admin user if not present in the database
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DataContext>();
     DatabaseSeeder.SeedAdmin(context);
 }
 
-app.UseCors("AllowAll"); // Apply CORS policy
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-
-//app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseHttpsRedirection();
-
-app.UseRouting();
-app.UseWebSockets();
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-app.UseEndpoints(endpoints =>
-{    });
-
-
-app.MapControllers();
-
+// Run the application
 app.Run();
 
-// دالة SeedAdmin لإضافة Admin تلقائيًا إذا لم يكن موجودًا
+
+
+
+// Seeder class to create an admin user if none exists
 public static class DatabaseSeeder
 {
-    
     public static void SeedAdmin(DataContext context)
     {
         if (!context.Admin.Any())
         {
-            var password = "adminadmin"; // Use a strong password
+            var password = "adminadmin"; // Use a strong password in production
             byte[] passwordHash, passwordSalt;
 
             using (var hmac = new HMACSHA512())
@@ -281,19 +265,4 @@ public static class DatabaseSeeder
             }
         }
     }
-
-
-
-    public static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-    {
-        using (var hmac = new HMACSHA512())
-        {
-            passwordSalt = hmac.Key;
-            passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-        }
-    }
-
-   
-
-
 }
