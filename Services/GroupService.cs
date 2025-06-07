@@ -34,7 +34,7 @@ namespace Learntendo_backend.Services
             Expert = 3,
             Master = 4
         }
-        public void AssignUsersToGroups()
+        public void AssignUsersToGroupsTest()
         {
 
             using (var scope = _scopeFactory.CreateScope())
