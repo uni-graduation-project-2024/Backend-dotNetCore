@@ -17,6 +17,7 @@ namespace Learntendo_backend.Data
         public DbSet<Admin> Admin { get; set; }
 
         public DbSet<Group> Group { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
