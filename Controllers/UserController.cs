@@ -14,6 +14,7 @@ using iText.Layout.Element;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Learntendo_backend.Migrations;
 
 namespace Learntendo_backend.Controllers
 {
@@ -117,7 +118,8 @@ namespace Learntendo_backend.Controllers
                     totalXp = user.TotalXp,
                     totalQuestion = user.TotalQuestion,
                     streakScore = user.StreakScore,
-                    level = user.Level
+                    level = user.Level,
+                    profilePic =user.ProfilePicturePath,
 
                 };
 
