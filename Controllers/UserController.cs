@@ -101,15 +101,32 @@ namespace Learntendo_backend.Controllers
                 return NotFound($"No user found with this ID: {userId}");
             }
         }
-        
-        [HttpGet("user-profile")]
-        // [Authorize(Roles = "Admin")]  // Ensure only admins can view users
+
+       
+
+        [HttpGet("user-profile")] 
         public async Task<IActionResult> UserProfile(int userId)
         {
-
             try
             {
                 var user = await _userRepo.GetByIdFun(userId);
+
+                
+                string base64Image = null;
+                if (!string.IsNullOrEmpty(user.ProfilePicturePath))  
+                {
+                   
+                    var relativePath = user.ProfilePicturePath.TrimStart('/');
+                    var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath);
+
+                    if (System.IO.File.Exists(fullPath))
+                    {
+                        var imageBytes = System.IO.File.ReadAllBytes(fullPath);
+                        var extension = Path.GetExtension(fullPath).ToLower().Replace(".", ""); // jpg/png
+                        base64Image = $"data:image/{extension};base64,{Convert.ToBase64String(imageBytes)}";
+                    }
+                }
+
                 var userProfileInfo = new
                 {
                     username = user.Username,
@@ -119,8 +136,7 @@ namespace Learntendo_backend.Controllers
                     totalQuestion = user.TotalQuestion,
                     streakScore = user.StreakScore,
                     level = user.Level,
-                    profilePic =user.ProfilePicturePath,
-
+                    profileImage = base64Image  // صورة مش مجرد مسار
                 };
 
                 return Ok(userProfileInfo);
@@ -130,6 +146,7 @@ namespace Learntendo_backend.Controllers
                 return NotFound($"No user found with this ID: {userId}");
             }
         }
+
 
         [HttpPost("buy-freeze-streak/{userId}")]
         public async Task<IActionResult> BuyFreezeStreak(int userId)
@@ -269,6 +286,7 @@ namespace Learntendo_backend.Controllers
             return Ok(new { message = "Profile picture uploaded successfully.", path = user.ProfilePicturePath });
         }
 
+     
 
         [HttpDelete("delete-account/{userId}")]
         public async Task<IActionResult> DeleteAccount(int userId)
