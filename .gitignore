@@ -366,8 +366,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /wwwroot/uploads
-<<<<<<< Updated upstream
 /wwwroot/profile_pics
-
-=======
->>>>>>> Stashed changes
