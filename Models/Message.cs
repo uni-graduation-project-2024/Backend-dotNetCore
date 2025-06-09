@@ -11,8 +11,6 @@ namespace Learntendo_backend.Models
 
         public int ChatId { get; set; }     
 
-        public int UserId { get; set; }
-
         public string UserMessage { get; set; }
 
         public string AiResponse { get; set; }
