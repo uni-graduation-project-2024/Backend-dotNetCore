@@ -160,11 +160,9 @@ app.UseAuthorization();
 // Map SignalR Hub endpoint
 app.MapHub<ChatHub>("/ChatHub");
 
-<<<<<<< Updated upstream
+
 app.MapHub<LeaderboardHub>("/leaderboardHub");
 
-=======
->>>>>>> Stashed changes
 // Map controller routes
 app.MapControllers();
 
@@ -177,7 +175,6 @@ RecurringJob.AddOrUpdate<LeagueService>(
     "reset-monthly-xp",
     x => x.ProcessMonthlyLeague(),
     Cron.Monthly);
-<<<<<<< Updated upstream
 
 
 //RecurringJob.AddOrUpdate<GroupService>(
@@ -188,8 +185,7 @@ RecurringJob.AddOrUpdate<LeagueService>(
 //    {
 //        TimeZone = TimeZoneInfo.Local
 //    });
-=======
->>>>>>> Stashed changes
+
 
 RecurringJob.AddOrUpdate<GroupService>(
     "test-group-assignment",
@@ -197,10 +193,6 @@ RecurringJob.AddOrUpdate<GroupService>(
     "*/30 * * * *",
     new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 // Schedule daily reset job for DailyResetService
 using (var scope = app.Services.CreateScope())
 {
