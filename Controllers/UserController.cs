@@ -134,7 +134,9 @@ namespace Learntendo_backend.Controllers
                     joinedDate = user.JoinedDate,
                     totalXp = user.TotalXp,
                     totalQuestion = user.TotalQuestion,
-                    streakScore = user.StreakScore,
+                    maxStreakScore = user.MaximunStreakScore,
+                    examsCreated = user.TotalExamsCreated,
+                    finishTop = user.FinishFirstInGroupChallenge,
                     level = user.Level,
                     profileImage = base64Image  // صورة مش مجرد مسار
                 };
@@ -267,6 +269,16 @@ namespace Learntendo_backend.Controllers
             if (user == null)
             {
                 return NotFound(new { message = "User not found." });
+            }
+            if(user.ProfilePicturePath != null)
+            {
+                var relativePath = user.ProfilePicturePath.TrimStart('/');
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath);
+
+                if (System.IO.File.Exists(fullPath))
+                {
+                    System.IO.File.Delete(fullPath);
+                }
             }
 
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profile_pics");
