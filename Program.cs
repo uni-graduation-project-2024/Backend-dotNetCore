@@ -160,6 +160,8 @@ app.UseAuthorization();
 // Map SignalR Hub endpoint
 app.MapHub<ChatHub>("/ChatHub");
 
+app.MapHub<LeaderboardHub>("/leaderboardHub");
+
 // Map controller routes
 app.MapControllers();
 
