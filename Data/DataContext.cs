@@ -18,6 +18,11 @@ namespace Learntendo_backend.Data
 
         public DbSet<Group> Group { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
+
+        public DbSet<ChatbotMessage> ChatbotMessages { get; set; }
+
+        public DbSet<Message> Messages { get; set; }
+
         public DbSet<FriendRequest> FriendRequests { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +51,22 @@ namespace Learntendo_backend.Data
                .WithMany(c => c.Exams)
                .HasForeignKey(sc => sc.SubjectId)
                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+               .HasOne(m => m.ChatbotMessage)        
+               .WithMany(c => c.Messages)            
+               .HasForeignKey(m => m.ChatId)         
+               .OnDelete(DeleteBehavior.Cascade);   
+
+
+            modelBuilder.Entity<ChatbotMessage>()
+            .HasKey(c => c.ChatId);
+
+            modelBuilder.Entity<Message>()
+                .HasKey(m => m.MessageId);
+
+
+
 
             modelBuilder.Entity<FriendRequest>()
                 .HasOne(fr => fr.Sender)

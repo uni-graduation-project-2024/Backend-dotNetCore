@@ -150,19 +150,27 @@ var app = builder.Build();
 
 // Enable CORS
 app.UseCors("AllowFrontend");
+var app = builder.Build();
+
+// Enable CORS
+app.UseCors("AllowFrontend");
 
 app.UseRouting();
 
+app.UseRouting();
 // Enable Authentication and Authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Enable Authentication and Authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
 // Map SignalR Hub endpoint
 app.MapHub<ChatHub>("/ChatHub");
 
-
+// Map SignalR Hub endpoint
+app.MapHub<ChatHub>("/ChatHub");
 app.MapHub<LeaderboardHub>("/leaderboardHub");
-
 
 // Map controller routes
 app.MapControllers();
@@ -173,28 +181,15 @@ app.MapHangfireDashboard();
 
 // Schedule recurring Hangfire jobs
 RecurringJob.AddOrUpdate<LeagueService>(
-    "reset-monthly-xp",
-    x => x.ProcessMonthlyLeague(),
-    Cron.Monthly);
-
-
-
-//RecurringJob.AddOrUpdate<GroupService>(
-//    "weekly-group-assignment",
-//    service => service.AssignUsersToGroupsTest(),
-//    Cron.Weekly(DayOfWeek.Saturday, 0, 0),
-//    new RecurringJobOptions
-//    {
-//        TimeZone = TimeZoneInfo.Local
-//    });
-
+            "reset-monthly-xp",
+            x => x.ProcessMonthlyLeague(),
+            Cron.Monthly);
 
 RecurringJob.AddOrUpdate<GroupService>(
     "test-group-assignment",
     service => service.AssignUsersToGroupsTest(),
     "*/30 * * * *",
     new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
-
 
 // Schedule daily reset job for DailyResetService
 using (var scope = app.Services.CreateScope())
