@@ -87,6 +87,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 // Register IUserIdProvider to identify UserId for each SignalR connection based on claims
 builder.Services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
+builder.Services.AddScoped<LeaderboardService>();
 
 // Add SignalR, Controllers, and Razor Pages support
 builder.Services.AddSignalR();
