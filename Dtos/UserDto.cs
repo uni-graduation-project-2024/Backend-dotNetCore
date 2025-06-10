@@ -38,8 +38,8 @@ namespace Learntendo_backend.Dtos
 
         public bool CompleteMonthlyChallenge { get; set; } = false;
         public Dictionary<string, string> LeagueHistory { get; set; } = new Dictionary<string, string>();
-       
 
+        public string ProfilePicture { get; set; }
 
 
     }

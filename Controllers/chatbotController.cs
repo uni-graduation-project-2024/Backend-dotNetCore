@@ -24,6 +24,20 @@ namespace Learntendo_backend.Controllers
                 _context = context;
             }
 
+            [HttpGet("userChats/{userId}")]
+            public async Task<IActionResult> GetUserChats(int userId)
+            {
+                var userChats = await _context.ChatbotMessages
+                    .Where(m => m.UserId == userId)
+                    .OrderBy(m => m.ChatDateTime)
+                    .ToListAsync();
+
+                if (userChats == null || userChats.Count == 0)
+                    return NotFound(new { message = "No messages found for this chat" });
+
+                return Ok(userChats);
+        }
+
             
             [HttpGet("{chatId}/messages")]
             public async Task<IActionResult> GetChatMessagesByChatId(int chatId)
@@ -66,13 +80,13 @@ namespace Learntendo_backend.Controllers
                 {
                     ChatName = dto.ChatName,
                     UserId = dto.UserId,
-                    ChatDateTime = dto.ChatDateTime
+                    ChatDateTime = DateTime.Now,
                 };
 
                 _context.ChatbotMessages.Add(chat);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { chatId = chat.ChatId });
+                return Ok(chat);
             }
 
         
@@ -87,10 +101,9 @@ namespace Learntendo_backend.Controllers
                 var message = new Message
                 {
                     ChatId = dto.ChatId,
-                    UserId = dto.UserId,
                     UserMessage = dto.UserMessages,
                     AiResponse = dto.AiResponse,
-                    ChatDateTime = dto.ChatDateTime,
+                    ChatDateTime = DateTime.Now,
                 };
 
                 _context.Messages.Add(message);

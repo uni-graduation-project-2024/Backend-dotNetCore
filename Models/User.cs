@@ -95,7 +95,12 @@ namespace Learntendo_backend.Models
         public string? ProfilePicturePath { get; set; }
 
         public string? ProblemReport { get; set; }
-
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public ICollection<FriendRequest> SentRequests { get; set; }
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public ICollection<FriendRequest> ReceivedRequests { get; set; }
 
     }
 }

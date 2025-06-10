@@ -20,7 +20,7 @@ namespace Learntendo_backend.Data
         Task UpdateFun(T entity);
         Task DeleteFun(int id);
 
-        
+        Task<string> GetBase64ImageAsync(string profilePicturePath);
 
 
     }

@@ -23,6 +23,7 @@ namespace Learntendo_backend.Data
 
         public DbSet<Message> Messages { get; set; }
 
+        public DbSet<FriendRequest> FriendRequests { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Group>()
@@ -65,6 +66,19 @@ namespace Learntendo_backend.Data
                 .HasKey(m => m.MessageId);
 
 
+
+
+            modelBuilder.Entity<FriendRequest>()
+                .HasOne(fr => fr.Sender)
+                .WithMany()
+                .HasForeignKey(fr => fr.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FriendRequest>()
+                .HasOne(fr => fr.Receiver)
+                .WithMany()
+                .HasForeignKey(fr => fr.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
         }

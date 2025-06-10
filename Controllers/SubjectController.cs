@@ -60,7 +60,7 @@ namespace Learntendo_backend.Controllers
             var subject = _map.Map<Subject>(subjectDto);
             subject.UserId = userId;
             await _subjectRepo.AddFun(subject);
-            return Ok(subjectDto) ;
+            return Ok(subject) ;
         }
 
    

@@ -5,6 +5,5 @@
         public string ChatName { get; set; }
         public int UserId { get; set; }
       
-        public DateTime ChatDateTime { get; set; }
     }
 }

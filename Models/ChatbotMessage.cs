@@ -10,10 +10,7 @@ namespace Learntendo_backend.Models
         public int UserId { get; set; }
         public string ChatName { get; set; }
        
-        public DateTime ChatDateTime
-        {
-            get; set;
-        }
+        public DateTime ChatDateTime { get; set; }
 
         public ICollection<Message> Messages { get; set; }
     }
