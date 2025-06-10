@@ -266,6 +266,24 @@ namespace Learntendo_backend.Data
 
             await _db.SaveChangesAsync();
         }
+        public async Task<string> GetBase64ImageAsync(string profilePicturePath)
+        {
+            if (string.IsNullOrEmpty(profilePicturePath))
+                return null;
+
+            var relativePath = profilePicturePath.TrimStart('/');
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath);
+
+            if (System.IO.File.Exists(fullPath))
+            {
+                var imageBytes = await System.IO.File.ReadAllBytesAsync(fullPath);
+                var extension = Path.GetExtension(fullPath).ToLower().Replace(".", "");
+                return $"data:image/{extension};base64,{Convert.ToBase64String(imageBytes)}";
+            }
+
+            return null;
+        }
+
 
 
         async Task<List<Exam>> IDataRepository<T>.GetByFileIdAsync(int fileId)
