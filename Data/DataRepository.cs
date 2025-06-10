@@ -7,6 +7,7 @@ using Learntendo_backend.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Learntendo_backend.Services;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Learntendo_backend.Data
@@ -16,10 +17,12 @@ namespace Learntendo_backend.Data
         private readonly DataContext _db;
         private readonly DbSet<T> table;
         private object _logger;
+        private readonly LeaderboardService _leaderboardService;
 
-        public DataRepository(DataContext db)
+        public DataRepository(DataContext db, LeaderboardService leaderboardService)
         {
            _db = db;
+            _leaderboardService = leaderboardService;
             table =_db.Set<T>();
         }
 
@@ -112,6 +115,8 @@ namespace Learntendo_backend.Data
                 user.DailyXp += exam.XpCollected;
                 user.WeeklyXp += exam.XpCollected;
                 user.MonthlyXp += exam.XpCollected;
+                await _leaderboardService.NotifyLeaderboardUpdate();
+
             }
 
             // Check User Daily Challenge Completion
