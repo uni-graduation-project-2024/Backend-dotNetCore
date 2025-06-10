@@ -141,6 +141,26 @@ namespace Learntendo_backend.Controllers
             return Ok(result);
         }
 
+        [HttpDelete("remove-friend")]
+        public async Task<IActionResult> RemoveFriend(int userId, int friendId)
+        {
+            var friendRequest = await _db.FriendRequests
+                .FirstOrDefaultAsync(r =>
+                    ((r.SenderId == userId && r.ReceiverId == friendId) ||
+                    (r.SenderId == friendId && r.ReceiverId == userId)) &&
+                    r.Status == FriendRequestStatus.Accepted);
+
+            if (friendRequest == null)
+            {
+                return NotFound("Friend not found.");
+            }
+
+            _db.FriendRequests.Remove(friendRequest);
+            await _db.SaveChangesAsync();
+
+            return Ok("Friend removed successfully.");
+        }
+
     }
 
 }
