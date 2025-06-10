@@ -121,7 +121,10 @@ namespace Learntendo_backend.Controllers
         {
             var receivedRequests = await _db.FriendRequests
                 .Where(r => r.ReceiverId == userId && r.Status == FriendRequestStatus.Pending)
+
+                
                 .Include(r => r.Sender) 
+
                 .ToListAsync();
 
             var result = new List<FriendsDto>();

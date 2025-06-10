@@ -150,23 +150,17 @@ var app = builder.Build();
 
 // Enable CORS
 app.UseCors("AllowFrontend");
-var app = builder.Build();
 
-// Enable CORS
-app.UseCors("AllowFrontend");
 
-app.UseRouting();
+
 
 app.UseRouting();
+
+
 // Enable Authentication and Authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Enable Authentication and Authorization middleware
-app.UseAuthentication();
-app.UseAuthorization();
-// Map SignalR Hub endpoint
-app.MapHub<ChatHub>("/ChatHub");
 
 // Map SignalR Hub endpoint
 app.MapHub<ChatHub>("/ChatHub");
