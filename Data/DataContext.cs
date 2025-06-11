@@ -7,7 +7,7 @@ namespace Learntendo_backend.Data
     public class DataContext : DbContext
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
-
+        public DbSet<FriendRequest> FriendRequests { get; set; }
         public  DbSet<Exam> Exam { get; set; }
 
         public  DbSet<Subject> Subject { get; set; }
@@ -23,7 +23,7 @@ namespace Learntendo_backend.Data
 
         public DbSet<Message> Messages { get; set; }
 
-        public DbSet<FriendRequest> FriendRequests { get; set; }
+       
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Group>()
@@ -68,17 +68,25 @@ namespace Learntendo_backend.Data
 
 
 
+            modelBuilder.Entity<Files>()
+                .HasOne(f => f.User)
+                .WithMany(u => u.Files)
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<FriendRequest>()
                 .HasOne(fr => fr.Sender)
-                .WithMany()
+                .WithMany(u => u.SentRequests)
                 .HasForeignKey(fr => fr.SenderId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade); 
 
             modelBuilder.Entity<FriendRequest>()
                 .HasOne(fr => fr.Receiver)
-                .WithMany()
+                .WithMany(u => u.ReceivedRequests)
                 .HasForeignKey(fr => fr.ReceiverId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); 
+
+
 
 
         }
