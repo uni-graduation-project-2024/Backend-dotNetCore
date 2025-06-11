@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Learntendo_backend.Controllers
 {
@@ -55,6 +57,31 @@ namespace Learntendo_backend.Controllers
 
             return Ok(new { Success = true, Message = message });
         }
+
+
+        [HttpGet("history/{senderId}/{receiverId}")]
+        public async Task<IActionResult> GetChatHistory(string senderId, string receiverId)
+        {
+            if (string.IsNullOrEmpty(senderId) || string.IsNullOrEmpty(receiverId))
+                return BadRequest("Both senderId and receiverId are required");
+
+            var messages = await _db.ChatMessages
+                .Where(m =>
+                    (m.SenderId == senderId && m.ReceiverId == receiverId) ||
+                    (m.SenderId == receiverId && m.ReceiverId == senderId))
+                .OrderBy(m => m.SentAt)
+                .Select(m => new ChatMessageDto
+                {
+                    SenderId = m.SenderId,
+                    ReceiverId = m.ReceiverId,
+                    Content = m.Content,
+                    SentAt = m.SentAt
+                })
+                .ToListAsync();
+
+            return Ok(messages);
+        }
+
     }
 }
 
