@@ -21,9 +21,9 @@ namespace Learntendo_backend.Data
 
         public DataRepository(DataContext db, LeaderboardService leaderboardService)
         {
-           _db = db;
+            _db = db;
             _leaderboardService = leaderboardService;
-            table =_db.Set<T>();
+            table = _db.Set<T>();
         }
 
         public async Task<IEnumerable<T>> GetAllFun()
@@ -32,15 +32,15 @@ namespace Learntendo_backend.Data
         }
         public async Task<List<Subject>> GetAllsubbyUserFun(int userId)
         {
-            return await _db.Subject.Where(x=>x.UserId == userId).ToListAsync();
+            return await _db.Subject.Where(x => x.UserId == userId).ToListAsync();
         }
         public async Task<List<Exam>> GetAllExambysubFun(int subId)
         {
             return await _db.Exam.Where(x => x.SubjectId == subId).ToListAsync();
         }
 
-       //NEW
-        public async Task<List<Exam>> GetAllExambyUserFun(int userId, int? subId= null)
+        //NEW
+        public async Task<List<Exam>> GetAllExambyUserFun(int userId, int? subId = null)
         {
             var query = _db.Exam.Where(x => x.UserId == userId);
 
@@ -69,7 +69,7 @@ namespace Learntendo_backend.Data
                 throw new KeyNotFoundException($" id {id} not found");
             }
             return result;
-        
+
         }
 
         public async Task AddFun(T entity)
@@ -97,7 +97,7 @@ namespace Learntendo_backend.Data
         {
             var user = await _db.User.FindAsync(exam.UserId);
             if (user == null) return;
-            
+
             user.TotalQuestion += exam.NumQuestions;
             user.NumQuestionSolToday += exam.NumQuestions;
             user.LastExamDate = DateTime.Now;
@@ -135,7 +135,7 @@ namespace Learntendo_backend.Data
             }
 
             _db.User.Update(user);
-            
+
 
             await _db.SaveChangesAsync();
         }
@@ -171,7 +171,7 @@ namespace Learntendo_backend.Data
                         {
                             user.TotalXp -= exam.XpCollected;
                             /////////////////////////////////////////
-                           // user.WeeklyXp += exam.XpCollected;
+                            // user.WeeklyXp += exam.XpCollected;
                         }
 
                         if (exam.CreatedDate.Date == DateTime.UtcNow.Date)
@@ -196,12 +196,12 @@ namespace Learntendo_backend.Data
                     }
 
                     await _db.SaveChangesAsync();
-                    await transaction.CommitAsync();  
+                    await transaction.CommitAsync();
                 }
                 catch (Exception)
                 {
-                    await transaction.RollbackAsync();  
-                    throw; 
+                    await transaction.RollbackAsync();
+                    throw;
                 }
             }
         }
@@ -231,18 +231,18 @@ namespace Learntendo_backend.Data
 
             if (hasExamToday)
             {
-               // user.CompleteDailyChallenge = true;
-               // user.DateCompleteDailyChallenge = today;
+                // user.CompleteDailyChallenge = true;
+                // user.DateCompleteDailyChallenge = today;
 
                 user.DailyXp = await _db.Exam
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.XpCollected);
-               
+
                 user.NumQuestionSolToday = await _db.Exam
                     .Where(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0 && e.NumQuestions > 0)
                     .SumAsync(e => e.NumQuestions);
 
-                
+
             }
             //else
             //{
@@ -312,6 +312,3 @@ namespace Learntendo_backend.Data
 
     }
 }
-
-
-
