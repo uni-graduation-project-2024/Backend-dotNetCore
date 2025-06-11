@@ -9,7 +9,7 @@
 
         public int ReceiverId { get; set; }
         public User Receiver { get; set; }
-
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
         public FriendRequestStatus Status { get; set; }
     }
 
