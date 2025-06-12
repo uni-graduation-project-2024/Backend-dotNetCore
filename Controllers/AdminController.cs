@@ -154,11 +154,27 @@ namespace Learntendo_backend.Controllers
                 return NotFound(new { message = "User not found." });
             }
 
+
+            var sentRequests = await _context.FriendRequests
+                .Where(fr => fr.SenderId == userId)
+                .ToListAsync();
+            if (sentRequests.Any())
+                _context.FriendRequests.RemoveRange(sentRequests);
+
+            var receivedRequests = await _context.FriendRequests
+                .Where(fr => fr.ReceiverId == userId)
+                .ToListAsync();
+            if (receivedRequests.Any())
+                _context.FriendRequests.RemoveRange(receivedRequests);
+
+           
             _context.User.Remove(user);
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "User deleted successfully!" });
+            return Ok(new { message = "User and related friend requests deleted successfully!" });
         }
+
 
         [Authorize(Roles = "Admin")]
         [HttpGet("search-user")]
