@@ -299,7 +299,6 @@ namespace Learntendo_backend.Controllers
         }
 
 
-
         [HttpDelete("delete-account/{userId}")]
         public async Task<IActionResult> DeleteAccount(int userId)
         {
@@ -312,28 +311,33 @@ namespace Learntendo_backend.Controllers
             if (user == null)
                 return NotFound(new { message = "User not found." });
 
+            // 🧹 حذف الرسائل اللي أرسلها أو استقبلها
+            var userIdStr = userId.ToString();
             var userMessages = await _context.ChatMessages
-            
+                .Where(m => m.SenderId == userIdStr || m.ReceiverId == userIdStr)
+                .ToListAsync();
+            if (userMessages.Any())
+            {
+                _context.ChatMessages.RemoveRange(userMessages);
+            }
+
             var sentRequests = await _context.FriendRequests
                 .Where(fr => fr.SenderId == userId)
                 .ToListAsync();
             if (sentRequests.Any())
                 _context.FriendRequests.RemoveRange(sentRequests);
 
-       
             var receivedRequests = await _context.FriendRequests
                 .Where(fr => fr.ReceiverId == userId)
                 .ToListAsync();
             if (receivedRequests.Any())
                 _context.FriendRequests.RemoveRange(receivedRequests);
 
-           
             if (user.Exams != null && user.Exams.Any())
             {
                 _context.Exam.RemoveRange(user.Exams);
             }
 
-           
             foreach (var subject in user.Subjects)
             {
                 if (subject.Exams != null && subject.Exams.Any())
@@ -342,16 +346,14 @@ namespace Learntendo_backend.Controllers
                 }
             }
 
-           
             _context.Subject.RemoveRange(user.Subjects);
-
-          
             _context.User.Remove(user);
 
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "User and all related data deleted successfully." });
         }
+
 
 
 
