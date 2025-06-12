@@ -158,32 +158,58 @@ namespace Learntendo_backend.Controllers
         [HttpDelete("delete-user/{userId}")]
         public async Task<IActionResult> DeleteUser(int userId)
         {
-            var user = await _context.User.FindAsync(userId);
+            var user = await _context.User
+                .Include(u => u.Exams)
+                .Include(u => u.Subjects)
+                    .ThenInclude(s => s.Exams)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
             if (user == null)
             {
                 return NotFound(new { message = "User not found." });
             }
 
+           
+            if (user.Exams != null && user.Exams.Any())
+            {
+                _context.Exam.RemoveRange(user.Exams);
+            }
 
+       
+            foreach (var subject in user.Subjects)
+            {
+                if (subject.Exams != null && subject.Exams.Any())
+                {
+                    _context.Exam.RemoveRange(subject.Exams);
+                }
+            }
+
+            if (user.Subjects != null && user.Subjects.Any())
+            {
+                _context.Subject.RemoveRange(user.Subjects);
+            }
+
+            
             var sentRequests = await _context.FriendRequests
                 .Where(fr => fr.SenderId == userId)
                 .ToListAsync();
             if (sentRequests.Any())
                 _context.FriendRequests.RemoveRange(sentRequests);
 
+            
             var receivedRequests = await _context.FriendRequests
                 .Where(fr => fr.ReceiverId == userId)
                 .ToListAsync();
             if (receivedRequests.Any())
                 _context.FriendRequests.RemoveRange(receivedRequests);
 
-           
             _context.User.Remove(user);
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "User and related friend requests deleted successfully!" });
+            return Ok(new { message = "User and all related data deleted successfully!" });
         }
+
 
 
         [Authorize(Roles = "Admin")]
