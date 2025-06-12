@@ -78,7 +78,7 @@ namespace Learntendo_backend.Data
                 .HasOne(fr => fr.Sender)
                 .WithMany(u => u.SentRequests)
                 .HasForeignKey(fr => fr.SenderId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<FriendRequest>()
                 .HasOne(fr => fr.Receiver)
