@@ -298,7 +298,7 @@ namespace Learntendo_backend.Controllers
             return Ok(new { message = "Profile picture uploaded successfully.", path = user.ProfilePicturePath });
         }
 
-     
+
 
         [HttpDelete("delete-account/{userId}")]
         public async Task<IActionResult> DeleteAccount(int userId)
@@ -306,17 +306,33 @@ namespace Learntendo_backend.Controllers
             var user = await _context.User
                 .Include(u => u.Subjects)
                     .ThenInclude(s => s.Exams)
-                .Include(u => u.Exams) 
+                .Include(u => u.Exams)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user == null)
                 return NotFound(new { message = "User not found." });
 
+            
+            var sentRequests = await _context.FriendRequests
+                .Where(fr => fr.SenderId == userId)
+                .ToListAsync();
+            if (sentRequests.Any())
+                _context.FriendRequests.RemoveRange(sentRequests);
+
+       
+            var receivedRequests = await _context.FriendRequests
+                .Where(fr => fr.ReceiverId == userId)
+                .ToListAsync();
+            if (receivedRequests.Any())
+                _context.FriendRequests.RemoveRange(receivedRequests);
+
+           
             if (user.Exams != null && user.Exams.Any())
             {
                 _context.Exam.RemoveRange(user.Exams);
             }
 
+           
             foreach (var subject in user.Subjects)
             {
                 if (subject.Exams != null && subject.Exams.Any())
@@ -325,14 +341,17 @@ namespace Learntendo_backend.Controllers
                 }
             }
 
+           
             _context.Subject.RemoveRange(user.Subjects);
 
+          
             _context.User.Remove(user);
 
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "User and all related data deleted successfully." });
         }
+
 
 
         [HttpPost("ReportProblem/{userId}")]
