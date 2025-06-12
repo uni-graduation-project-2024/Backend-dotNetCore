@@ -170,12 +170,20 @@ namespace Learntendo_backend.Controllers
             }
 
            
+            var userIdStr = userId.ToString();
+            var userMessages = await _context.ChatMessages
+                .Where(m => m.SenderId == userIdStr || m.ReceiverId == userIdStr)
+                .ToListAsync();
+            if (userMessages.Any())
+            {
+                _context.ChatMessages.RemoveRange(userMessages);
+            }
+
             if (user.Exams != null && user.Exams.Any())
             {
                 _context.Exam.RemoveRange(user.Exams);
             }
 
-       
             foreach (var subject in user.Subjects)
             {
                 if (subject.Exams != null && subject.Exams.Any())
@@ -189,14 +197,12 @@ namespace Learntendo_backend.Controllers
                 _context.Subject.RemoveRange(user.Subjects);
             }
 
-            
             var sentRequests = await _context.FriendRequests
                 .Where(fr => fr.SenderId == userId)
                 .ToListAsync();
             if (sentRequests.Any())
                 _context.FriendRequests.RemoveRange(sentRequests);
 
-            
             var receivedRequests = await _context.FriendRequests
                 .Where(fr => fr.ReceiverId == userId)
                 .ToListAsync();
@@ -204,11 +210,11 @@ namespace Learntendo_backend.Controllers
                 _context.FriendRequests.RemoveRange(receivedRequests);
 
             _context.User.Remove(user);
-
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "User and all related data deleted successfully!" });
         }
+
 
 
 
