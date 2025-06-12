@@ -312,6 +312,7 @@ namespace Learntendo_backend.Controllers
             if (user == null)
                 return NotFound(new { message = "User not found." });
 
+            var userMessages = await _context.ChatMessages
             
             var sentRequests = await _context.FriendRequests
                 .Where(fr => fr.SenderId == userId)
