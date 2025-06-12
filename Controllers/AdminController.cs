@@ -129,21 +129,31 @@ namespace Learntendo_backend.Controllers
                 passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             }
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpGet("view-users")]
         public async Task<IActionResult> ViewUsers()
         {
+        
             var users = await _context.User.ToListAsync();
-            if (users.Count == 0)
-            {
-                return Ok(new { message = "No users found." });
-            }
 
-            return Ok(users);
+         
+            var totalUsers = users.Count;
+
+      
+            var totalExams = await _context.Exam.CountAsync(); 
+
+
+            return Ok(new
+            {
+                totalUsers,
+                totalExams,
+                users
+            });
         }
 
-        
+
+
         [Authorize(Roles = "Admin")]
         [HttpDelete("delete-user/{userId}")]
         public async Task<IActionResult> DeleteUser(int userId)
