@@ -38,19 +38,19 @@ namespace Learntendo_backend.Data
                .HasOne(sc => sc.User)
                .WithMany(c => c.Subjects)
                .HasForeignKey(sc => sc.UserId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Exam>()
                .HasOne(sc => sc.User)
                .WithMany(c => c.Exams)
                .HasForeignKey(sc => sc.UserId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Exam>()
                .HasOne(sc => sc.Subject)
                .WithMany(c => c.Exams)
                .HasForeignKey(sc => sc.SubjectId)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Message>()
                .HasOne(m => m.ChatbotMessage)        
@@ -84,7 +84,7 @@ namespace Learntendo_backend.Data
                 .HasOne(fr => fr.Receiver)
                 .WithMany(u => u.ReceivedRequests)
                 .HasForeignKey(fr => fr.ReceiverId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Cascade); 
 
 
 
