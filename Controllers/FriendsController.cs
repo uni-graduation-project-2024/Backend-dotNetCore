@@ -158,11 +158,29 @@ namespace Learntendo_backend.Controllers
                 return NotFound("Friend not found.");
             }
 
+           
+            var userIdStr = userId.ToString();
+            var friendIdStr = friendId.ToString();
+
+            var messages = await _db.ChatMessages
+                .Where(m =>
+                    (m.SenderId == userIdStr && m.ReceiverId == friendIdStr) ||
+                    (m.SenderId == friendIdStr && m.ReceiverId == userIdStr))
+                .ToListAsync();
+
+
+            if (messages.Any())
+            {
+                _db.ChatMessages.RemoveRange(messages);
+            }
+
+            
             _db.FriendRequests.Remove(friendRequest);
             await _db.SaveChangesAsync();
 
-            return Ok("Friend removed successfully.");
+            return Ok("Friend and related messages removed successfully.");
         }
+
 
     }
 
