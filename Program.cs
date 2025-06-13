@@ -171,20 +171,25 @@ app.MapHub<LeaderboardHub>("/leaderboardHub");
 app.MapControllers();
 
 // Enable Hangfire Dashboard
-app.UseHangfireDashboard();
+app.UseHangfireDashboard("/hangfire");
 app.MapHangfireDashboard();
 
 // Schedule recurring Hangfire jobs
 RecurringJob.AddOrUpdate<LeagueService>(
-            "reset-monthly-xp",
-            x => x.ProcessMonthlyLeague(),
-            Cron.Monthly);
+    "reset-monthly-xp",
+    x => x.ProcessMonthlyLeague(),
+    "0 1 1 * *");
+
 
 RecurringJob.AddOrUpdate<GroupService>(
     "test-group-assignment",
     service => service.AssignUsersToGroupsTest(),
-    "*/30 * * * *",
-    new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
+    "59 23 * * 4", // Every Thursday at 11:59 PM
+    new RecurringJobOptions
+    {
+        TimeZone = TimeZoneInfo.Local
+    });
+//http://localhost:5000/hangfire hangfireDashboard
 
 // Schedule daily reset job for DailyResetService
 using (var scope = app.Services.CreateScope())
