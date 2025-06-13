@@ -47,7 +47,7 @@ namespace Learntendo_backend.Controllers
             new Claim(ClaimTypes.Role, "User")
         };
 
-            // جلب المفتاح السري من الإعدادات appsettings.json
+            //  appsettings.json
             var secretKey = _configuration["JwtSettings:SecretKey"];
             var keyBytes = Encoding.UTF8.GetBytes(secretKey);
 
