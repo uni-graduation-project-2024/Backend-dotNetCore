@@ -28,7 +28,7 @@ namespace Learntendo_backend.Data
         {
             modelBuilder.Entity<Group>()
             .Property(g => g.StartDate)
-            .HasColumnType("datetime2"); // تأكد من دعم النوع في قاعدة البيانات
+            .HasColumnType("datetime2"); 
 
             modelBuilder.Entity<Group>()
                 .Property(g => g.EndDate)
