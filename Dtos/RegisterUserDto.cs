@@ -5,6 +5,7 @@ namespace Learntendo_backend.Dtos
     public class RegisterUserDto
     {
         [Required(ErrorMessage = "Password is required")]
+        [StringLength(30, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 30 characters.")]
         public required string Username { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
