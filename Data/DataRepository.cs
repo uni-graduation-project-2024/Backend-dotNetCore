@@ -214,16 +214,16 @@ namespace Learntendo_backend.Data
             var today = DateTime.UtcNow.Date;
 
             var oldLastExamDate = user.LastExamDate;
-            // جلب أحدث امتحان للمستخدم
+           
             var latestExam = await _db.Exam
                 .Where(e => e.UserId == userId)
                 .OrderByDescending(e => e.CreatedDate)
                 .FirstOrDefaultAsync();
 
-            // تحديث تاريخ آخر امتحان إذا كان هناك امتحان جديد اليوم
+            
             if (latestExam != null && latestExam.CreatedDate.Date == today)
             {
-                user.LastExamDate = latestExam.CreatedDate; // تحديث التاريخ إلى أحدث امتحان
+                user.LastExamDate = latestExam.CreatedDate; 
             }
 
             bool hasExamToday = await _db.Exam
@@ -259,13 +259,12 @@ namespace Learntendo_backend.Data
 
             //}
 
-            // تحديث Streak Score
             var existexam = await _db.Exam.CountAsync(e => e.UserId == userId && e.CreatedDate.Date == today && e.XpCollected > 0);
 
             if (existexam == 1 && (oldLastExamDate == null || oldLastExamDate?.Date != today))
             {
                 user.StreakScore += 1;
-                user.LastExamDate = today; // تحديث تاريخ آخر زيادة لـ StreakScore
+                user.LastExamDate = today; 
             }
 
 
@@ -306,7 +305,7 @@ namespace Learntendo_backend.Data
         //        await CheckDailyChallenge(userId);
         //    }
 
-        //    await _db.SaveChangesAsync(); // حفظ التغييرات بعد تعديل جميع المستخدمين
+        //    await _db.SaveChangesAsync(); 
         //}
 
 
