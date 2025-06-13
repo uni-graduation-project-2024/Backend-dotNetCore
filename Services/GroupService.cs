@@ -83,7 +83,7 @@ namespace Learntendo_backend.Services
                 _db.Group.Add(newWeek);
                 _db.SaveChanges();
 
-                Console.WriteLine($"تم إنشاء الجروب للأسبوع {newWeek.GroupName}");
+                Console.WriteLine($"The group was created for the week {newWeek.GroupName}");
 
                 var users = _db.User.ToList();
                 var random = new Random();
