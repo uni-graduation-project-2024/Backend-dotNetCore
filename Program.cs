@@ -189,7 +189,7 @@ RecurringJob.AddOrUpdate<GroupService>(
     {
         TimeZone = TimeZoneInfo.Local
     });
-//http://localhost:5000/hangfire hangfireDashboard
+//http://localhost:7078/hangfire hangfireDashboard
 
 // Schedule daily reset job for DailyResetService
 using (var scope = app.Services.CreateScope())
