@@ -195,7 +195,7 @@ namespace Learntendo_backend.Controllers
             }
 
             var userDto = _mapper.Map<UserDto>(user); 
-            int dailytarget = 50;
+            int dailytarget = 30;
             List<int> monthlytarget = [1000, 2000, 3000];
            
             return Ok(new
